@@ -1,0 +1,135 @@
+<!-- templates/partials/preloader.html -->
+<style>
+  /* ——— Preloader Tam Ekran Kapağı ——— */
+  #preloader {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(44, 62, 80, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  /* sayfa tamamen yüklendiğinde gizle */
+  body.loaded #preloader {
+    display: none;
+  }
+
+  /* —— Orijinal CSS’in tamamı, sadece scope’u #preloader içine aldık —— */
+  #preloader .container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #preloader .notlarsende-container {
+    position: relative;
+    width: 250px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #preloader .notlarsende {
+    font-size: 2.5em;
+    color: white;
+    position: absolute;
+  }
+
+  #preloader .nokta {
+    width: 15px;
+    height: 15px;
+    background-color: #2c3e50;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+
+  #preloader .com-kismi {
+    font-size: 2.5em;
+    color: #2c3e50;
+    position: absolute;
+    top: 60px;
+    animation: fadeInOut 3s infinite;
+  }
+
+  @keyframes fadeInOut {
+    0%,100% { opacity: 0; transform: translateY(10px); }
+    50%     { opacity: 1; transform: translateY(0); }
+  }
+
+  #preloader .trail-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(44, 62, 80, 0.8);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    animation: fadeOut 1s linear forwards;
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; transform: scale(0.5); }
+  }
+</style>
+
+<div id="preloader">
+  <div class="container">
+    <div class="notlarsende-container">
+      <div class="notlarsende">NotlarSende</div>
+      <div class="nokta" id="donenNokta"></div>
+    </div>
+    <div class="com-kismi">.com</div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const donenNokta = document.getElementById('donenNokta');
+    const container = document.querySelector('#preloader .notlarsende-container');
+    const radius = container.offsetWidth / 2;
+    let angle = 0;
+    const speed = 0.03;
+
+    function createTrail(x, y) {
+      const trail = document.createElement('div');
+      trail.classList.add('trail-dot');
+      trail.style.left = `${x}px`;
+      trail.style.top = `${y}px`;
+      container.appendChild(trail);
+      setTimeout(() => trail.remove(), 1000);
+    }
+
+    function animate() {
+      angle += speed;
+      const x = container.offsetWidth/2 + radius*Math.cos(angle) - donenNokta.offsetWidth/2;
+      const y = container.offsetHeight/2 + radius*Math.sin(angle) - donenNokta.offsetHeight/2;
+      donenNokta.style.left = `${x}px`;
+      donenNokta.style.top  = `${y}px`;
+      donenNokta.style.transform = `translate(-50%, -50%) scale(${1 + 0.5*Math.sin(angle)})`;
+      createTrail(x + donenNokta.offsetWidth/2, y + donenNokta.offsetHeight/2);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // *** Gecikme süresi (ms) ***
+    const HIDE_DELAY = 100; // istediğin milisaniyeyi buraya yaz
+
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.body.classList.add('loaded');
+      }, HIDE_DELAY);
+    });
+	
+  })();
+</script>
+
+

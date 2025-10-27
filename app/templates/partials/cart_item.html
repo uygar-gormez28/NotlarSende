@@ -1,0 +1,177 @@
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #f5f5f5;
+  }
+
+  .empty-cart {
+    text-align: center;
+    font-size: 1.1em; /* "Sepetinizde henüz ürün yok..." metninin temel boyutu */
+    color: #666;
+    font-weight: 500;
+    box-sizing: border-box; /* Padding ve border'ı toplam yüksekliğe/genişliğe dahil eder */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* İçeriği dikeyde ortalar */
+    align-items: center;   /* İçeriği yatayda ortalar */
+
+    /* Header (115px) + 20px istenen boşluk = 135px */
+    padding-top: 135px;
+    /* Footer (150px) + 20px istenen boşluk = 170px */
+    padding-bottom: 170px;
+    padding-left: 20px;  /* Yan boşluklar */
+    padding-right: 20px; /* Yan boşluklar */
+
+    min-height: 100vh;   /* Elemanın KENDİSİ (padding dahil) en az tüm ekran yüksekliğini kaplar */
+                         /* Bu, önceki margin-top yaklaşımından farklı ve daha sağlamdır. */
+  }
+
+  /* .empty-cart içindeki, inline style'ı olan div'in içindeki p'yi (emojiyi) hedefler */
+  .empty-cart div[style*="margin-bottom"] > p {
+    font-size: 4.5rem;  /* Emojiyi büyütür */
+    line-height: 1;     /* Dikey hizalamayı iyileştirir */
+    margin: 0;          /* <p>'nin varsayılan margin'lerini sıfırlar */
+  }
+
+  .cart-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 60px;
+    box-sizing: border-box; /* Padding ve border'ı toplam yüksekliğe/genişliğe dahil eder */
+    max-width: 1200px;    /* İçeriği ortalamak ve geniş ekranlarda sınırlamak için */
+    margin-left: auto;
+    margin-right: auto;
+
+    /* Header (115px) + 20px istenen boşluk = 135px */
+    padding-top: 135px;
+    /* Footer (150px) + 20px istenen boşluk = 170px */
+    padding-bottom: 170px;
+    padding-left: 20px;  /* Yan boşluklar */
+    padding-right: 20px; /* Yan boşluklar */
+
+    min-height: 100vh;   /* Elemanın KENDİSİ (padding dahil) en az tüm ekran yüksekliğini kaplar */
+  }
+
+  .cart-left {
+    width: 520px;
+  }
+
+  .cart-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 25px;
+  }
+
+  .cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+
+  .item-info { flex: 1; max-width: 250px; margin-right: 15px; }
+  .item-title { font-weight: 600; font-size: 1.1em; margin-bottom: 4px; word-break: break-word; }
+  .item-meta { font-size: 0.95em; color: #666; margin-bottom: 3px; }
+  .item-desc { font-size: 0.9em; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qty-control { display: flex; align-items: center; gap: 10px; margin: 0 15px; }
+  .qty-btn { background-color: #2c3e50; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .qty-text { font-weight: 500; font-size: 1em; }
+  .price-box { text-align: right; min-width: 90px; }
+  .item-price { font-weight: bold; color: #27ae60; font-size: 1.1em; margin-bottom: 5px; }
+  .remove-btn { background: #e74c3c; color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.9em; cursor: pointer; }
+
+  .cart-summary {
+    background: #fff;
+    padding: 22px;
+    border-radius: 12px;
+    width: 300px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    position: sticky;
+    top: 145px; /* Header (115px) + 20px (boşluk) = 135px (içerik başlangıcı). Ondan 10px sonra. */
+    align-self: flex-start;
+    max-height: calc(100vh - 145px - 20px); /* 145px top, 20px ekranın altıyla güvenlik payı */
+    overflow-y: auto;
+  }
+
+  .cart-summary h3 { font-size: 1.2em; margin-bottom: 16px; font-weight: bold; }
+  .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .summary-total { font-weight: bold; margin-top: 12px; margin-bottom: 16px; border-top: 1px solid #ddd; padding-top: 10px; }
+  .discount-input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 12px; font-size: 1em; box-sizing: border-box; }
+  .buy-btn { width: 100%; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 1em; font-weight: bold; cursor: pointer; box-sizing: border-box; }
+  .buy-btn:hover { background-color: #1f8c3a; }
+</style>
+
+{% if sepet|length == 0 %}
+  <div class="empty-cart">
+    <div style="margin-bottom: 15px;">
+      <p> 🛒
+      </p>
+    </div>
+    Sepetinizde henüz ürün yok.<br>
+    Notlara göz atarak sepetinizi doldurmaya başlayabilirsiniz.
+  </div>
+{% else %}
+  <div class="cart-wrapper">
+    <div class="cart-left">
+      <h2 class="cart-title">🛒 Sepetiniz</h2>
+      {% for product in sepet %}
+      <div class="cart-item">
+        <div class="item-info">
+          <div class="item-title">{{ product.title }}</div>
+          <div class="item-meta">{{ product.university }} — {{ product.faculty }}</div>
+          <div class="item-desc">{{ product.description }}</div>
+        </div>
+        <div class="qty-control">
+          <form method="post" action="{{ url_for('update_cart_quantity') }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <input type="hidden" name="action" value="decrease">
+            <button type="submit" class="qty-btn">−</button>
+          </form>
+          <span class="qty-text">{{ product.quantity }}</span>
+          <form method="post" action="{{ url_for('update_cart_quantity') }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <input type="hidden" name="action" value="increase">
+            <button type="submit" class="qty-btn">+</button>
+          </form>
+        </div>
+        <div class="price-box">
+          <div class="item-price">{{ product.price }} ₺</div>
+          <form method="post" action="{{ url_for('remove_from_cart') }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <button type="submit" class="remove-btn">Sil</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="cart-summary">
+      <h3>Sipariş Özeti</h3>
+      <div class="summary-row">
+        <span>Ürün Toplamı</span>
+        <span>{{ toplam_tutar }} TL</span>
+      </div>
+      <div class="summary-row">
+        <span>Kargo</span>
+        <span>-</span>
+      </div>
+      <div class="summary-total summary-row">
+        <span>Toplam</span>
+        <span>{{ toplam_tutar }} TL</span>
+      </div>
+      <form method="post" action="{{ url_for('purchase') }}">
+        <input type="text" name="discount_code" class="discount-input" placeholder="İndirim kodu gir">  
+        <button type="submit" class="buy-btn">Satın Al</button>
+      </form>
+    </div>
+
+  </div>
+{% endif %}

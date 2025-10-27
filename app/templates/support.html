@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yardım & Destek Paneli</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* TEMEL AYARLAR VE GENEL STİLLER */
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background-color: #f7f8fc;
+      color: #333;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    /* Utility sınıflar */
+    .mr-1 { margin-right: .25rem; }
+    .ml-1 { margin-left: .25rem; }
+    .text-xs { font-size: .75rem; }
+    .text-gray-500 { color: #6c757d; }
+    .block { display: block; }
+    .inline-block { display: inline-block; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    main.content-container {
+      min-height: 100vh;
+      box-sizing: border-box;
+      display: flex; flex-direction: column;
+      justify-content: flex-start; align-items: center;
+      padding: 150px 20px 60px; /* header 150px */
+      width: 100%;
+    }
+
+    .sorun {
+      text-align: center;
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      max-width: 700px; width: 100%;
+      margin-top: 30px;
+    }
+    .sub-text { color: #6c757d; font-size: .95rem; margin-bottom: 8px; }
+    .main-text {
+      font-size: 1.1rem; font-weight: 500;
+      color: #343a40; margin-bottom: 25px;
+    }
+    .btn {
+      background: #007bff; color: #fff; border: none;
+      padding: 12px 28px; border-radius: 8px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,123,255,0.3);
+      transition: background 0.2s, box-shadow 0.2s;
+      display: inline-block; text-align: center;
+    }
+    .btn:hover {
+      background: #0056b3;
+      box-shadow: 0 4px 10px rgba(0,123,255,0.4);
+    }
+
+    .support-list {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      max-width: 800px; width: 100%;
+      margin: 0 auto 30px;
+    }
+    .support-list h3 {
+      font-size: 1.4rem; font-weight: 600;
+      color: #343a40; margin: 0 0 20px;
+      padding-bottom: 10px; border-bottom: 1px solid #e9ecef;
+    }
+    .support-list ul { list-style: none; padding: 0; margin: 0; }
+    .support-list li {
+      padding: 18px 15px;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background: #fdfdfd;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .support-list li:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    .support-list li strong { color: #007bff; font-size: 1.05rem; }
+
+    .btn-delete {
+      background: #dc3545; color: #fff; border: none;
+      padding: 8px 14px; border-radius: 6px;
+      font-size: .9rem; font-weight: 500; cursor: pointer;
+      transition: background 0.2s;
+      display: inline-block; margin-top: 8px;
+    }
+    .btn-delete:hover { background: #c82333; }
+
+    .jinja-success-message {
+      background: #d1e7dd; color: #0f5132;
+      padding: 15px 20px; border: 1px solid #badbcc;
+      border-radius: 8px; max-width: 800px; margin: 20px auto;
+      text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      opacity: 1; transition: opacity 0.5s;
+    }
+
+    .sag-panel {
+      position: fixed;
+      top: 0px; /* header yüksekliği */
+      right: -450px;
+      width: 450px;
+      background: #fff;
+      box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+      transition: right 0.35s cubic-bezier(.25,.8,.25,1);
+      z-index: 1001;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .sag-panel.acik { right: 0; }
+
+    .panel-baslik-bar {
+      display: flex; justify-content: space-between;
+      align-items: center;
+      padding: 18px 25px;
+      border-bottom: 1px solid #e9ecef;
+      background: #f8f9fa;
+      flex-shrink: 0;
+    }
+    .panel-baslik-bar h2 {
+      margin: 0; color: #343a40;
+      font-size: 1.25rem; font-weight: 600;
+    }
+    .panel-kapat-btn {
+      background: none; border: none; font-size: 28px;
+      cursor: pointer; color: #6c757d; padding: 5px;
+      transition: color 0.2s;
+    }
+    .panel-kapat-btn:hover { color: #dc3545; }
+
+    .panel-icerik {
+      padding: 25px; flex-grow: 1; overflow-y: auto;
+    }
+
+    #gecmisAlisveris {
+      margin-bottom: 25px;
+    }
+    #gecmisAlisveris h3 {
+      color: #343a40; font-size: 1.1rem; font-weight: 600;
+      margin: 0 0 15px; padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .alisveris-listesi {
+      list-style: none; padding: 0; margin: 0;
+    }
+    .alisveris-listesi li {
+      padding: 12px 15px;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      font-size: .95rem; color: #495057;
+    }
+    .alisveris-listesi li:hover {
+      background: #e9f5ff;
+      box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+      color: #0056b3;
+    }
+
+    .farkli-talep-btn {
+      background: #6c757d; color: #fff; border: none;
+      padding: 12px 20px; border-radius: 8px;
+      font-size: 1rem; font-weight: 500; cursor: pointer;
+      width: 100%; margin: 10px 0 20px;
+      transition: background 0.2s;
+      text-align: center; display: inline-block;
+    }
+    .farkli-talep-btn:hover { background: #5a6268; }
+
+    #canliDestekBolumu {
+      padding: 20px; background: #f9f9f9;
+      border: 1px solid #e0e0e0; border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    #mesajInput {
+      width: 100%; padding: 12px 15px;
+      margin-bottom: 15px; border: 1px solid #ced4da;
+      border-radius: 6px; resize: vertical;
+      box-sizing: border-box; font-size: .95rem;
+      min-height: 100px;
+    }
+    #mesajInput:focus {
+      outline: none; border-color: #80bdff;
+      box-shadow: 0 0 0 .2rem rgba(0,123,255,0.25);
+    }
+    #mesajGonderBtn {
+      width: 100%; margin-top: 0;
+    }
+	
+	/* #gecmisAlisveris içindeki alışveriş listesine özel stil */
+	#gecmisAlisveris .alisveris-listesi { /* veya #alisverisList seçicisi de olur */
+	/* Mevcut stilleriniz (list-style, padding, margin vb.) burada olabilir */
+	list-style: none; 
+	padding: 0;
+	margin: 0;
+
+	/* ---- YENİ EKLENECEK ÖZELLİKLER ---- */
+	max-height: 25rem;  /* Listenin maksimum yüksekliği. Yaklaşık 7 ürün için. */
+						/* Bir liste elemanınızın ortalama yüksekliğine göre bu değeri ayarlayın. */
+						/* Örneğin, bir li ~3.5rem ise, 7 * 3.5rem = 24.5rem. */
+	overflow-y: auto;   /* Eğer içerik max-height'i geçerse, dikey kaydırma çubuğu göster. */
+	padding-right: 8px; /* Kaydırma çubuğu için sağda küçük bir boşluk (isteğe bağlı) */
+	}
+	
+	/* Açılmış Destek Talepleri listesine özel stil */
+	.support-list ul {
+	/* Eğer bu seçici için zaten stil tanımınız varsa, sadece aşağıdaki özellikleri ekleyin/güncelleyin */
+	/* Yoksa, aşağıdaki gibi tam bir tanım oluşturabilirsiniz: */
+
+	list-style: none; /* Liste işaretlerini kaldır (zaten yapmıştınız) */
+	padding: 0;       /* İç boşluğu sıfırla (zaten yapmıştınız) */
+	margin: 0;        /* Dış boşluğu sıfırla (zaten yapmıştınız) */
+
+	/* ---- YENİ EKLENECEK ÖZELLİKLER ---- */
+	max-height: 22rem;  /* Listenin maksimum yüksekliği. Yaklaşık 3 uzun talep için. */
+						/* Bir talep öğesinin (`li`) ortalama yüksekliğine göre bu değeri ayarlayın. */
+						/* Örneğin, bir `li` tüm içeriğiyle (başlık, mesaj, buton) ortalama 7rem yer kaplıyorsa, */
+						/* 3 * 7rem = 21rem. Bu değeri kendi sayfanızda deneyerek tam ayarlayabilirsiniz. */
+	overflow-y: auto;   /* Eğer içerik max-height'i geçerse, dikey kaydırma çubuğu göster. */
+	padding-right: 8px; /* Kaydırma çubuğu için sağda küçük bir boşluk (isteğe bağlı) */
+	}
+  </style>
+</head>
+<body>
+  {% include 'partials/header.html' %}
+
+  <main class="content-container">
+    {% with flashes = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in flashes %}
+        <p class="jinja-success-message">{{ msg }}</p>
+      {% endfor %}
+    {% endwith %}
+
+    {% if support_requests %}
+      <div class="support-list">
+        <h3>  
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block align-text-bottom mr-1"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          Açılmış Destek Talepleriniz
+        </h3>
+        <ul>
+          {% for req in support_requests %}
+            <li>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <strong>{{ products_map.get(req.product_id, {}).title or 'Genel Destek Talebi' }}</strong>
+                  <span class="text-xs text-gray-500 ml-1">({{ req.timestamp.split('T')[0] }})</span>
+                  <p style="margin:6px 0 8px; color:#555; font-size:.9rem;">{{ req.message }}</p>
+                </div>
+                <form method="post" action="{{ url_for('delete_support_request') }}">
+                  <input type="hidden" name="ticket_index" value="{{ loop.index0 }}">
+                  <button type="submit" class="btn-delete" aria-label="Sil">
+                    🗑️
+                  </button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="sorun">
+      {% if not support_requests %}
+        <p class="sub-text">Henüz açık bir destek talebiniz yok.</p>
+        <p class="main-text">Yardıma ihtiyacınız olduğunda biz buradayız.</p>
+      {% else %}
+        <p class="sub-text">Mevcut taleplerinizi yukarıda görebilirsiniz.</p>
+        <p class="main-text">Yeni bir talepte bulunmak için tıklayın.</p>
+      {% endif %}
+      <button id="yeniTalepBtn" class="btn">Yeni Destek Talebi Oluştur</button>
+    </div>
+  </main>
+
+  {% include 'partials/footer.html' %}
+
+  <div id="sagPanel" class="sag-panel" role="dialog" aria-modal="true">
+    <div class="panel-baslik-bar">
+      <h2 id="panelBaslik">Yeni Destek Talebi</h2>
+      <button id="panelKapatBtn" class="panel-kapat-btn" aria-label="Paneli Kapat">&times;</button>
+    </div>
+    <div class="panel-icerik">
+      <div id="gecmisAlisveris">
+        <h3>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block align-text-bottom mr-1"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          İlgili Alışverişinizi Seçin
+        </h3>
+        {% if purchases %}
+          <ul class="alisveris-listesi" id="alisverisList">
+            {% for pid in purchases | reverse %} 
+              {% set prod = products_map.get(pid) %}
+              {% if prod %}
+                <li data-urun-id="{{ pid }}">
+                  {{ prod.title or 'Adsız Ürün' }}
+                  {% if prod.date %}<span class="text-xs text-gray-500 ml-1">({{ prod.date }})</span>{% endif %}
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Daha önce alışveriş yapmadınız.</p>
+        {% endif %}
+      </div>
+      <button id="farkliTalepBtn" class="farkli-talep-btn">Genel Bir Talepte Bulun</button>
+      <div id="canliDestekBolumu" class="canli-destek-bolumu">
+        <form method="post" action="{{ url_for('support') }}">
+          <input type="hidden" name="selected_product" id="selectedProduct" value="">
+          <label for="mesajInput" class="block mb-1">Mesajınız:</label>
+          <textarea name="message" id="mesajInput" placeholder="Sorununuzu yazın..." required></textarea>
+          <button type="submit" id="mesajGonderBtn" class="btn" style="margin-top:10px;">
+            Destek Talebini Gönder
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const panel          = document.getElementById('sagPanel');
+    const header         = document.getElementById('panelBaslik');
+    const selectedInput  = document.getElementById('selectedProduct');
+    const formArea       = document.getElementById('canliDestekBolumu');
+    const yeniBtn        = document.getElementById('yeniTalepBtn');
+    const genelBtn       = document.getElementById('farkliTalepBtn');
+    const closeBtn       = document.getElementById('panelKapatBtn');
+    const flashEl        = document.querySelector('.jinja-success-message');
+    const listContainer  = document.getElementById('alisverisList');
+
+    function openPanel(title, selId='') {
+      header.textContent = title;
+      selectedInput.value = selId;
+      formArea.style.display = 'block';
+      panel.classList.add('acik');
+    }
+    function closePanel() {
+      panel.classList.remove('acik');
+    }
+
+    yeniBtn.addEventListener('click', e=>{
+      e.stopPropagation();
+      openPanel('Yeni Destek Talebi Oluştur','');
+    });
+
+    genelBtn.addEventListener('click', e=>{
+      e.stopPropagation();
+      openPanel('Genel Bir Talepte Bulun','');
+    });
+
+    listContainer && listContainer.addEventListener('click', e=>{
+      const li = e.target.closest('li[data-urun-id]');
+      if (!li) return;
+      e.stopPropagation();
+      const id = li.dataset.urunId;
+      const text = li.textContent.trim().split('(')[0].trim();
+      openPanel(text ? `${text} Hakkında Destek` : 'Destek Talebi', id);
+    });
+
+    closeBtn.addEventListener('click', e=>{
+      e.stopPropagation();
+      closePanel();
+    });
+
+    document.addEventListener('click', e=>{
+      if (panel.classList.contains('acik') && !panel.contains(e.target) && e.target !== yeniBtn && e.target !== genelBtn) {
+        closePanel();
+      }
+    });
+
+    document.addEventListener('keydown', e=>{
+      if (e.key === 'Escape') closePanel();
+    });
+
+    if (flashEl) {
+      setTimeout(() => {
+        flashEl.style.opacity = '0';
+        setTimeout(() => flashEl.remove(), 500);
+      }, 3000);
+    }
+  });
+  </script>
+</body>
+</html>

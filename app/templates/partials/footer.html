@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footer Örneği (Temizlenmiş CSS)</title>
+    <style>
+        /*
+          Tailwind CSS genellikle global bir stil sıfırlaması (preflight) içerir,
+          bu da tüm öğeler için box-sizing: border-box; ayarını yapar.
+          Bu CSS'in beklendiği gibi çalışması için projenizde benzer bir ayarın
+          olduğundan emin olun. Aşağıda bu kural eklenmiştir.
+        */
+        *,
+        *::before,
+        *::after {
+          box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth; /* Daha akıcı sayfa içi geçişler için eklenebilir */
+        }
+
+        body {
+          margin: 0; /* Tarayıcı varsayılan body margin'ini sıfırlamak için */
+          font-family: sans-serif; /* Okunabilirlik için temel bir font */
+        }
+
+        /* Renk Paleti (Tailwind Varsayılanlarından) */
+        :root {
+          --color-yellow-400: #facc15;
+          --color-yellow-500: #eab308;
+          --color-gray-300: #d1d5db;
+          --color-gray-400: #9ca3af;
+          --color-custom-bg: #2c3e50; /* Footer arkaplan rengi */
+          --color-white: #ffffff;
+        }
+
+        /* Footer Ana Kapsayıcı */
+        .site-primary-footer {
+          background-color: var(--color-custom-bg);
+          color: var(--color-white);
+          padding-block: 1.5rem; /* padding-top ve padding-bottom birleştirildi */
+        }
+
+        .footer-content-wrapper {
+          display: flex;
+          flex-direction: column;
+          padding-bottom: 1rem;
+          padding-inline: 1rem; /* padding-left ve padding-right birleştirildi */
+          max-width: 80rem;
+          margin-inline: auto; /* margin-left ve margin-right birleştirildi */
+        }
+
+        /* Orta Boy Ekranlar ve Üzeri (md: 768px) */
+        @media (min-width: 768px) {
+          .footer-content-wrapper {
+            flex-direction: row;
+            padding-inline: 1.5rem;
+          }
+        }
+
+        /* Marka Bölümü */
+        .footer-brand-section {
+          width: 100%;
+          margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+          .footer-brand-section {
+            width: 33.333333%;
+            margin-bottom: 0;
+            margin-right: 1rem;
+          }
+        }
+
+        .site-footer-logo {
+          text-transform: uppercase;
+          font-size: 1.25rem;
+          line-height: 1.75rem;
+          font-weight: 700;
+          display: block;
+          margin-bottom: 0.25rem;
+          color: inherit;
+          text-decoration: none;
+        }
+
+        /* Büyük Ekranlar ve Üzeri (lg: 1024px) */
+        @media (min-width: 1024px) {
+          .site-footer-logo {
+            font-size: 1.5rem;
+            line-height: 2rem;
+          }
+        }
+
+        .copyright-info-text {
+          font-size: 0.75rem;
+          line-height: 1rem;
+          color: var(--color-yellow-400);
+          margin-bottom: 0.5rem;
+        }
+
+        .social-media-nav { /* Sosyal medya linkleri için eklenen nav sarmalayıcı */
+            margin-top: 0.5rem; /* İsteğe bağlı: Logo ve ikonlar arasına biraz boşluk */
+        }
+
+        .social-media-icons {
+          display: flex;
+          gap: 0.75rem; /* Elemanlar arası boşluk için modern gap özelliği */
+        }
+
+        .social-media-icons a {
+          transition-property: transform;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+
+        .social-media-icons a:hover {
+          transform: scale(1.1);
+        }
+
+        .social-media-icons img {
+          height: 1.25rem;
+          width: 1.25rem;
+          display: block; /* Resimlerin altındaki olası boşlukları engellemek için */
+        }
+
+        /* Hızlı Linkler Bölümü */
+        .footer-navigation-links {
+          width: 100%;
+          margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+          .footer-navigation-links {
+            width: 33.333333%;
+            margin-bottom: 0;
+          }
+        }
+
+        .footer-section-heading {
+          font-size: 1rem;
+          line-height: 1.5rem;
+          font-weight: 700;
+          margin-bottom: 0.5rem;
+        }
+
+        .footer-links-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.25rem 0.75rem; /* Satır ve sütun boşlukları birleştirildi */
+          text-transform: uppercase;
+          font-size: 0.75rem;
+          line-height: 1rem;
+        }
+
+        .footer-link-item {
+          color: inherit;
+          text-decoration: none;
+          transition-property: color; /* Sadece renk değiştiği için sadeleştirildi */
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+
+        .footer-link-item:hover {
+          color: var(--color-yellow-400);
+        }
+
+        /* Bülten Bölümü */
+        .footer-newsletter-section {
+          width: 100%;
+        }
+
+        @media (min-width: 768px) {
+          .footer-newsletter-section {
+            width: 33.333333%;
+          }
+        }
+
+        .newsletter-signup-form {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        /* Küçük Ekranlar ve Üzeri (sm: 640px) */
+        @media (min-width: 640px) {
+          .newsletter-signup-form {
+            flex-direction: row;
+          }
+        }
+
+        .newsletter-email-input {
+          padding: 0.375rem 0.5rem; /* padding-block ve padding-inline birleştirildi */
+          flex-grow: 1;
+          border-radius: 0.375rem;
+          border: 1px solid var(--color-yellow-400); /* border-width, border-style, border-color birleştirildi */
+          background-color: transparent;
+          outline: 2px solid transparent; /* Odak stilini yönetmek için temel, :focus-visible ile özelleştirilebilir */
+          outline-offset: 2px;
+          color: var(--color-white);
+          font-size: 0.875rem;
+          line-height: 1.25rem;
+        }
+
+        .newsletter-email-input::placeholder {
+          color: var(--color-gray-300);
+          opacity: 1; /* Firefox için opaklık düzeltmesi */
+        }
+
+        .newsletter-subscribe-button {
+          padding: 0.375rem 0.75rem; /* padding-block ve padding-inline birleştirildi */
+          color: var(--color-white);
+          text-transform: uppercase;
+          border-radius: 0.375rem;
+          background-color: var(--color-yellow-400);
+          font-weight: 600;
+          font-size: 0.875rem;
+          line-height: 1.25rem;
+          border: none;
+          cursor: pointer;
+          transition-property: background-color; /* Sadece arkaplan rengi değiştiği için sadeleştirildi */
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+
+        .newsletter-subscribe-button:hover {
+          background-color: var(--color-yellow-500);
+        }
+
+        /* İkon Atıf Bölümü */
+        .footer-bottom-text {
+          text-align: center;
+          font-size: 0.75rem;
+          line-height: 1rem;
+          color: var(--color-gray-400);
+          margin-top: 0.75rem;
+        }
+
+        .footer-bottom-text a {
+          text-decoration-line: underline;
+          color: inherit;
+          transition: color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .footer-bottom-text a:hover {
+          color: var(--color-yellow-400);
+        }
+    </style>
+</head>
+<body>
+
+<br>
+<br>
+<br>
+
+<footer class="site-primary-footer">
+  <div class="footer-content-wrapper">
+
+    <div class="footer-brand-section">
+      <a href="#" class="site-footer-logo">NotlarSende</a>
+      <p class="copyright-info-text">© 2025 Tüm Hakları Saklıdır.</p>
+      <nav class="social-media-nav" aria-label="Sosyal medya hesaplarımız">
+        <div class="social-media-icons">
+          <a href="#" title="Facebook ikon bağlantısı">
+            <img src="https://cdn-icons-png.flaticon.com/32/59/59228.png" alt="Facebook" />
+          </a>
+          <a href="#" title="Twitter ikon bağlantısı">
+            <img src="https://cdn-icons-png.flaticon.com/32/733/733579.png" alt="Twitter" />
+          </a>
+          <a href="#" title="Instagram ikon bağlantısı">
+            <img src="https://cdn-icons-png.flaticon.com/32/174/174855.png" alt="Instagram" />
+          </a>
+          <a href="#" title="LinkedIn ikon bağlantısı">
+            <img src="https://cdn-icons-png.flaticon.com/32/174/174857.png" alt="LinkedIn" />
+          </a>
+        </div>
+      </nav>
+    </div>
+
+    <nav class="footer-navigation-links" aria-labelledby="footer-nav-heading">
+      <h2 id="footer-nav-heading" class="footer-section-heading">HIZLI LİNKLER</h2>
+      <div class="footer-links-grid">
+        <a class="footer-link-item" href="#">Yardım</a>
+        <a class="footer-link-item" href="#">Hakkımızda</a>
+        <a class="footer-link-item" href="#">İletişim</a>
+        <a class="footer-link-item" href="#">İş Birliği</a>
+        <a class="footer-link-item" href="#">Staj</a>
+      </div>
+    </nav>
+
+    <div class="footer-newsletter-section">
+      <h2 class="footer-section-heading">BİZİ TAKİP EDİN</h2>
+      <form class="newsletter-signup-form">
+        <input
+          type="email"
+          class="newsletter-email-input"
+          placeholder="E-posta Adresiniz"
+          aria-label="E-posta Adresiniz"
+        />
+        <button
+          type="submit"
+          class="newsletter-subscribe-button"
+        >
+          Kaydol
+        </button>
+      </form>
+    </div>
+  </div>
+  <div class="footer-bottom-text">
+      <p>İkonlar <a href="https://www.flaticon.com/" title="Flaticon">Flaticon</a>'dan alınmıştır.</p>
+  </div>
+</footer>
+
+</body>
+</html>

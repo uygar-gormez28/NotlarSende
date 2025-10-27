@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Giriş / Kayıt</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/login.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div id="login-form" class="form-box {% if active_form=='login' %}active{% endif %}">
+      <h2>Giriş</h2>
+      {% if errors.login %}
+        <p class="error-message">{{ errors.login }}</p>
+      {% endif %}
+      <form method="post" action="{{ url_for('login') }}">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Şifre" required>
+        <button type="submit">Giriş Yap</button>
+        <p>Hesabınız yok mu? <a href="#" onclick="showForm('register-form')">Kayıt Ol</a></p>
+      </form>
+    </div>
+
+    <div id="register-form" class="form-box {% if active_form=='register' %}active{% endif %}">
+      <h2>Kayıt</h2>
+      {% if errors.register %}
+        <p class="error-message">{{ errors.register }}</p>
+      {% endif %}
+      <form method="post" action="{{ url_for('register') }}">
+        <input type="text"   name="name"     placeholder="Adınız" required>
+        <input type="email"  name="email"    placeholder="Email" required>
+        <input type="password" name="password" placeholder="Şifre" required>
+        <select name="role" required>
+          <option value="">Üyelik Türü Seçiniz</option>
+          <option value="user">Normal</option>
+          <option value="plus+">PLUS+</option>
+        </select>
+        <button type="submit">Kayıt Ol</button>
+        <p>Zaten hesabınız var mı? <a href="#" onclick="showForm('login-form')">Giriş Yap</a></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='../static/js/login.js') }}"></script>
+</body>
+</html>

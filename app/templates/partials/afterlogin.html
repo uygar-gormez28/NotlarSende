@@ -1,0 +1,137 @@
+<style>
+  .loginuye {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 40px;
+    margin-top: 10px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .user-dropdown {
+    position: relative;
+  }
+
+  .user-btn {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+  }
+
+  .user-btn:hover {
+    background-color: #f0f0f0;
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+    min-width: 200px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .dropdown-menu li {
+    padding: 10px 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropdown-menu li a {
+    color: #333;
+    text-decoration: none;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+  }
+
+  .dropdown-menu li:hover {
+    background-color: #f7f7f7;
+  }
+
+  .dropdown-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .cart-icon {
+    font-size: 30px;
+    color: #333;
+    text-decoration: none;
+    position: relative;
+    margin-right: 10px;
+  }
+
+  #cart-count {
+    background-color: red;
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 50%;
+    position: absolute;
+    top: -8px;
+    right: -10px;
+  }
+</style>
+
+{% if current_user %}
+<nav class="loginuye">
+  <div class="user-dropdown">
+    <button class="user-btn" onclick="toggleDropdown()">
+      👤 {{ current_user["name"] }}
+      <span class="caret">▾</span>
+    </button>
+    <ul id="dropdownMenu" class="dropdown-menu">
+      <li><a href="{{ url_for('account') }}">👤 Hesap</a></li>
+      <li><a href="{{ url_for('store') }}">🛍️ Mağazam</a></li>
+      <li><a href="{{ url_for('support') }}">🆘 Yardım</a></li>
+      <li><a href="{{ url_for('logout') }}">🚪 Çıkış</a></li>
+    </ul>
+  </div>
+
+  <a href="{{ url_for('cart') }}" class="cart-icon" title="Sepetim">
+    🛒 <span id="cart-count">{{ cart_count }}</span>
+  </a>
+</nav>
+{% endif %}
+
+<script>
+  function toggleDropdown() {
+    document.getElementById('dropdownMenu').classList.toggle('show');
+  }
+
+  window.addEventListener('click', function (e) {
+    const dropdown = document.getElementById('dropdownMenu');
+    const button = document.querySelector('.user-btn');
+    if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('show');
+    }
+  });
+</script>
+
+
+<!--Bu kısım sepetin animasyonları ile alakalı-->

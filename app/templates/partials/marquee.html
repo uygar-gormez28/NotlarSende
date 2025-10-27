@@ -1,0 +1,49 @@
+
+    <style>
+      /* KAYAN YAZI (MARQUEE) */
+      /* Sayfada yatay olarak kayan bir metin alanı oluşturur. */
+      .marquee {
+        overflow: hidden; /* İçeriğin dışına taşmasını engeller. */
+        background-color: #3c3c3c; /* Arka plan rengini koyu gri yapar.  */
+        height: 40px; /* Yüksekliğini 40 piksel yapar. */
+        line-height: 40px; /* Metin satır yüksekliğini 40 piksel yaparak dikeyde ortalar. */
+        white-space: nowrap; /* Metnin tek satırda kalmasını sağlar. */
+        color: white; /* Metin rengini beyaz yapar. */
+        font-size: 15px; /* Font boyutunu 15 piksel yapar. */
+        position: relative; /* İçindeki elementlerin konumlandırılması için referans noktası oluşturur. */
+        top: 113px;
+      }
+      .marquee-content {
+        display: inline-block; /* Yan yana sıralanmasını sağlar. */
+        animation: marquee 20s linear infinite; /* "marquee" adlı animasyonu 20 saniye süresince doğrusal bir hızda sonsuza kadar çalıştırır. */
+        animation-delay: 0s; /* Animasyonun başlangıç gecikmesini sıfır yapar. */
+      }
+      .marquee-text {
+        display: inline-block; /* Yan yana sıralanmasını sağlar. */
+        padding-right: 50px; /* Sağ tarafına 50 piksellik iç boşluk ekler. */
+      }
+      @keyframes marquee {
+        0% {
+          transform: translateX(0);
+        } /* Animasyonun başlangıcında (0%), elementi yatayda hiç hareket ettirmez. */
+        100% {
+          transform: translateX(calc(-1257px));
+        } /* Animasyonun sonunda (100%), elementi yatayda -1257 piksel hareket ettirir. Bu değer, kayan metnin genişliğine göre ayarlanmalıdır. */
+      }
+    </style>
+ 
+	<div class="marquee">
+		<div class="marquee-content">
+			<span class="marquee-text">AYLIK ABONELİK İLE ANLAŞMALI OLAN ÜNİVERSİTELERİN NOTLARINA SINIRSIZ ERİŞİM</span>
+			<span class="marquee-text">AYLIK ABONELİK İLE ANLAŞMALI OLAN ÜNİVERSİTELERİN NOTLARINA SINIRSIZ ERİŞİM</span>
+			<span class="marquee-text">AYLIK ABONELİK İLE ANLAŞMALI OLAN ÜNİVERSİTELERİN NOTLARINA SINIRSIZ ERİŞİM</span>
+			<span class="marquee-text">AYLIK ABONELİK İLE ANLAŞMALI OLAN ÜNİVERSİTELERİN NOTLARINA SINIRSIZ ERİŞİM</span>
+			<span class="marquee-text">AYLIK ABONELİK İLE ANLAŞMALI OLAN ÜNİVERSİTELERİN NOTLARINA SINIRSIZ ERİŞİM</span>
+		</div>
+	</div>
+
+	<script>
+		console.log("marquee başarıyla yüklendi");		
+	</script>
+
+

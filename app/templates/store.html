@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mağazam</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    /* === YENİ CSS KURALI: Ana İçerik Kapsayıcısı === */
+    .main-page-content-wrapper {
+      min-height: 100vh; /* Kapsayıcının yüksekliği en az tüm ekran yüksekliği kadar olur */
+      box-sizing: border-box; /* Padding ve border değerleri toplam yüksekliğe/genişliğe dahil edilir */
+      /* Aşağıdaki padding değerleri, önceki başarılı örneğinizdeki değerlerdir.
+         Bunlar yaklaşık 115px header + 20px boşluk ve 150px footer + 20px boşluk varsayımına dayanır.
+         Header/footer yükseklikleriniz farklıysa bu değerleri ayarlamanız gerekebilir. */
+      padding-top: 135px;
+      padding-bottom: 170px;
+    }
+    /* === /YENİ CSS KURALI === */
+
+
+    /* === GÜNCELLENMİŞ CSS KURALI: Ürün Ekle Butonu Kapsayıcısı === */
+    .add-product-container {
+      text-align: center;
+      /* margin-top: 120px; */ /* Orijinal değer. Artık .main-page-content-wrapper'ın padding-top'u bu görevi üstleniyor. */
+      margin-top: 0; /* İçerik, kapsayıcının padding-top'undan sonra başlar. Gerekirse küçük bir margin eklenebilir, ör: 20px */
+      margin-bottom: 20px; /* Ürün listesi öncesinde biraz boşluk bırakmak için (opsiyonel) */
+    }
+    /* === /GÜNCELLENMİŞ CSS KURALI === */
+
+    .add-product-button {
+      padding: 10px 16px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+
+    .add-product-button:hover {
+      background-color: #45a049;
+    }
+
+    /* === Modal CSS === (Mevcut stiller korundu) */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 45%; left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 35px 30px;
+      width: 420px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      z-index: 1001;
+      text-align: center;
+    }
+
+    .close {
+      position: absolute;
+      right: 16px;
+      top: 12px;
+      font-size: 24px;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: #000;
+    }
+
+    .drop-zone {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      border: 2px dashed #4CAF50;
+      border-radius: 10px;
+      padding: 30px 20px;
+      background-color: #f9f9f9;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      overflow: hidden;
+    }
+
+    .drop-zone.hover {
+      background-color: #eaffea;
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .drop-inner {
+      z-index: 1;
+      text-align: center;
+    }
+
+    .drop-inner .icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .drop-inner .text {
+      font-size: 14px;
+      color: #555;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  {% include 'partials/header.html' %}
+
+  <div class="main-page-content-wrapper">
+
+    <div class="add-product-container">
+      <button onclick="openModal()" class="add-product-button">+ Ürün Ekle</button>
+    </div>
+
+    <div id="uploadModal" class="modal">
+      <div class="modal-backdrop" onclick="closeModal()"></div>
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 style="margin-top: 0;">📤 Ürün Yükle</h2>
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+          <label class="drop-zone" id="dropZone">
+            <div class="drop-inner">
+              <div class="icon">📁</div>
+              <div class="text">Dosyanı buraya sürükle veya tıkla</div>
+            </div>
+            <input type="file" id="fileInput" name="file" accept=".pdf,.docx,.pptx" required>
+          </label>
+        </form>
+      </div>
+    </div>
+    
+    <div id="product-list">
+      {% for product in user_products %}
+        {% include 'partials/product_card.html' %}
+      {% endfor %}
+    </div>
+
+    {% include 'partials/publish_modal.html' %}
+  
+  </div>
+  {% include 'partials/footer.html' %}
+
+  <script>
+    let submitted = false;
+
+    function openModal() {
+      document.getElementById("uploadModal").style.display = "block";
+      submitted = false;
+    }
+
+    function closeModal() {
+      document.getElementById("uploadModal").style.display = "none";
+    }
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadForm = document.getElementById('uploadForm');
+
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('hover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('hover');
+    });
+
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('hover');
+      if (submitted) return;
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        submitted = true;
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        fileInput.files = dt.files;
+        uploadForm.submit();
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (submitted || fileInput.files.length === 0) return;
+      submitted = true;
+      uploadForm.submit();
+    });
+  </script>
+
+</body>
+</html>

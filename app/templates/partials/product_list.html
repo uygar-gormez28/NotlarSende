@@ -1,0 +1,21 @@
+<div class="product-list-wrapper">
+  {% for product in products %}
+    {% if product.published %}
+      {% include 'partials/product_card.html' %}
+    {% endif %}
+  {% else %}
+    <p style="text-align: center; padding: 20px;">Henüz ürün bulunmamaktadır.</p>
+  {% endfor %}
+</div>
+
+
+<style>
+  .product-list-wrapper {
+    display: flex; /* İçindeki notları yatay olarak düzenlemek için flexbox kullanır. */
+    flex-wrap: wrap; /* Gerekirse notların alt satıra geçmesini sağlar. */
+    gap: 10px; /* Notlar arasındaki boşluğu 10 piksel yapar. */
+    justify-content: center; /* Notları yatayda ortalar. */
+    margin-top: 20px; /* Üst boşluğu 20 piksel yapar. */
+    padding: 20px; /* İç boşlukları 20 piksel olarak ayarlar. */
+  }
+</style>

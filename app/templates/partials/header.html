@@ -1,0 +1,149 @@
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+<header class="app-main-header fixed top-0 left-0 w-full bg-[#2c3e50] z-50 shadow-md">
+  <div class="header-content-area mx-auto flex items-center justify-between px-4 h-[110px] md:px-6">
+
+    <a href="{{ url_for('ana_sayfa') }}" class="site-brand-link flex items-center h-full">
+      <img
+        src="{{ url_for('static', filename='img/logo.png') }}"
+        alt="Site Logosu"
+        class="brand-logo-image h-[210px] object-contain"
+      />
+      </a>
+
+    <div class="global-search-container hidden md:flex items-center">
+      <input
+        type="text"
+        id="mainWebsiteSearchInput"
+        class="search-text-field w-[300px] md:w-[500px] lg:w-[600px] px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        placeholder="Ürünleri, Bölümleri veya Sayfaları Ara…"
+      />
+    </div>
+
+    {% if current_user %}
+      {% include 'partials/afterlogin.html' %}
+    {% else %}
+    <nav class="user-auth-navigation">
+      <ul class="auth-action-list flex items-center space-x-6 md:space-x-10">
+        <li>
+          <a
+            href="{{ url_for('show_login') }}"
+            class="nav-link-item h-10 flex items-center px-3 text-white font-bold rounded hover:text-yellow-400 transition-colors duration-300"
+          >
+            Giriş Yap
+          </a>
+        </li>
+        <li>
+          <a
+            href="{{ url_for('show_register') }}"
+            class="nav-link-item h-10 flex items-center px-3 text-white font-bold rounded hover:text-yellow-400 transition-colors duration-300"
+          >
+            Üye Ol
+          </a>
+        </li>
+        <li>
+          <a
+            href="{{ url_for('show_login') }}"
+            aria-label="Alışveriş Sepeti"
+            class="shopping-cart-button h-10 w-10 flex items-center justify-center rounded-full transition-transform duration-200 ease-in-out hover:scale-110 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          >
+            <span class="text-2xl md:text-3xl leading-none">🛒</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
+
+  </div>
+</header>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+
+
+<style>
+#flash-container {
+  position: fixed;
+  top: 115px; right: 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  z-index: 10000;
+}
+
+.flash {
+  padding: 12px 18px; border-radius: 4px; color: white;
+  font-family: 'Poppins', sans-serif; opacity: 1;
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.flash-success { background: #28a745; }
+.flash-warning { background: #dc3545; }
+
+.flash.fade {
+  opacity: 0; transform: translateY(-10px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Tüm sepete-ekle butonlarını seç. (class="add-to-cart-btn" verdiğini varsayıyorum)
+  document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.preventDefault();
+
+      // JSON göndersin diye data-attribute kullan
+      const prodId   = btn.dataset.productId;
+      const filename = btn.dataset.filename;
+
+      try {
+        const res = await fetch('/add-to-cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product_id: prodId, filename })
+        });
+
+        const data = await res.json();
+
+        if (res.status === 401 && data.redirect) {
+          // login değilse yönlendir
+          window.location = data.redirect;
+          return;
+        }
+
+        // Bildirimi göster
+        showFlash(data.message, data.success ? 'success' : 'warning');
+
+        // badge’i güncelle
+        const badge = document.getElementById('cart-count');
+        if (badge && typeof data.cart_count !== 'undefined') {
+          badge.textContent = data.cart_count;
+        }
+
+      } catch (err) {
+        showFlash('⚠️ Sepete ekleme başarısız.', 'warning');
+      }
+    });
+  });
+});
+
+// flash mesaj kutusu
+function showFlash(msg, category) {
+  // container yoksa oluştur
+  let container = document.getElementById('flash-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'flash-container';
+    document.body.appendChild(container);
+  }
+  const div = document.createElement('div');
+  div.className = `flash flash-${category}`;
+  div.textContent = msg;
+  container.appendChild(div);
+  // 3 saniye sonra kaybolsun
+  setTimeout(() => {
+    div.classList.add('fade');
+    setTimeout(() => container.removeChild(div), 500);
+  }, 3000);
+}
+</script>

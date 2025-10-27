@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hesabım - {% if profile and profile.name %}{{ profile.name }}{% else %}Kullanıcı{% endif %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* === TEMEL BODY STİLİ === */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* === STICKY FOOTER İÇİN KAPSAYICI === */
+        .page-level-content-wrapper {
+            min-height: 100vh;
+            box-sizing: border-box;
+            /* Global header (~115px) ve footer (~150px) için varsayılan boşluklar.
+               Bu değerler sizin header/footer yüksekliklerinize ve istediğiniz boşluklara göre ayarlanmalıdır. */
+            padding-top: 135px;    /* Örnek: 115px header + 20px boşluk */
+            padding-bottom: 170px; /* Örnek: 150px footer + 20px boşluk */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* === FLASH MESAJLARI İÇİN STİL === */
+        .flashes {
+            /* Sticky header'ınız varsa ve yüksekliği ~115px ise:
+            position: sticky; 
+            top: 115px; 
+            z-index: 1025; */
+            /* Şimdilik normal akışta, wrapper'ın padding'i ile header arası boşluk oluşacak */
+            padding: 0 15px; /* Kenar boşlukları için */
+            margin-bottom: 15px;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 10px; /* Mesajlar arası boşluk */
+            border: 1px solid transparent;
+            border-radius: 6px; 
+            text-align: center;
+        }
+        .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+        .alert-danger  { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+        .alert-warning { color: #856404; background-color: #fff3cd; border-color: #ffeeba; }
+        .alert-info    { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
+
+        /* === ANA İÇERİK KONTEYNERİ === */
+        .container {
+            max-width: 960px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #ffffff;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+            width: 100%; /* Mobil için daha iyi olabilir */
+            box-sizing: border-box; /* Padding'in genişliğe dahil olması için */
+        }
+        /* .page-level-content-wrapper flex ise, .container'ın dikeyde esnememesi için */
+        .page-level-content-wrapper > .container {
+             margin-top: 30px; 
+             margin-bottom: 30px;
+        }
+
+        h2, h3 {
+            color: #556b2f;
+            font-weight: 500;
+            margin-top: 0;
+        }
+        h2 { font-size: 1.8em; margin-bottom: 20px; }
+        h3 { font-size: 1.5em; margin-bottom: 15px; }
+
+        /* Bölümler */
+        .bilgiler, .satin-alim-gecmisi {
+            margin-bottom: 35px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .bilgiler p { margin-bottom: 12px; color: #555; }
+        .bilgiler p strong { color: #333; }
+
+        /* Liste stilleri (Satın Alım Geçmişi için) */
+        .data-list { list-style: none; padding: 0; }
+        .data-list li {
+            padding: 15px 0;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .data-list li:last-child { border-bottom: none; }
+        .data-list h4 { margin:0 0 8px 0; color: #556b2f; font-size: 1.1em;}
+        .data-list .product-details { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;}
+        .data-list .product-info { flex-grow: 1; }
+        .data-list .product-price { text-align: right; font-weight: bold; color: #27ae60; font-size: 1.1em; white-space: nowrap;}
+        .data-list p { margin:0 0 5px 0; font-size: 0.9em; color: #666; }
+
+
+        /* Buton Stilleri */
+        .button-style {
+            background-color: #556b2f;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button-style:hover {
+            background-color: #3d4e20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .duzenle-btn { /* Zaten .button-style'dan miras alıyor, gerekirse özelleştirin */ }
+        .kaydet-btn {} /* .button-style */
+        .iptal-btn { background-color: #6c757d; }
+        .iptal-btn:hover { background-color: #5a6268; }
+
+        /* Bilgi Düzenleme Formu */
+        .bilgi-duzenle {
+            margin-top: 25px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+        }
+        .bilgi-duzenle div { margin-bottom: 15px; }
+        .bilgi-duzenle label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #444;
+        }
+        .bilgi-duzenle input[type="text"],
+        .bilgi-duzenle input[type="email"],
+        .bilgi-duzenle input[type="password"],
+        .bilgi-duzenle input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+            font-family: 'Poppins', sans-serif;
+        }
+        .bilgi-duzenle input::placeholder { color: #999; }
+        .bilgi-duzenle input[readonly][disabled] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .bilgi-duzenle .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .bilgi-duzenle small {
+            display: block;
+            margin-top: 4px;
+            color: #777;
+            font-size: 0.85em;
+        }
+         hr {
+            margin: 30px 0;
+            border: 0;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    {% include 'partials/header.html' %}
+
+    <div class="page-level-content-wrapper">  
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flashes">
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <main>
+                <section class="bilgiler">
+                    <h2>Hesap Bilgileri</h2>
+                    <div class="bilgi-goster">
+                        <p><strong>E-posta:</strong> {{ profile.email }}</p>
+                        <p><strong>Ad Soyad:</strong> {{ profile.name or 'Belirtilmemiş' }}</p>
+                        <p><strong>Telefon:</strong> {{ profile.phone or 'Belirtilmemiş' }}</p>
+                        <p><strong>Şifre:</strong> ********</p> 
+                        <button type="button" class="duzenle-btn button-style">Bilgileri Düzenle</button>
+                    </div>
+
+                    <div class="bilgi-duzenle" style="display: none;">
+                        <h3>Bilgileri Düzenle</h3>
+                        <form id="duzenleForm" method="post" action="{{ url_for('account') }}">
+                            <div>
+                                <label for="form-email-display">E-posta (Değiştirilemez):</label>
+                                <input type="email" id="form-email-display" name="email_display" value="{{ profile.email }}" readonly disabled>
+                            </div>
+                            <div>
+                                <label for="form-name">Ad Soyad:</label>
+                                <input type="text" id="form-name" name="name" value="{{ profile.name or '' }}" required>
+                            </div>
+                            <div>
+                                <label for="form-phone">Telefon:</label>
+                                <input type="tel" id="form-phone" name="phone" value="{{ profile.phone or '' }}" placeholder="Örn: 5551234567">
+                            </div>
+                            <div>
+                                <label for="form-password">Yeni Şifre:</label>
+                                <input type="password" id="form-password" name="password" placeholder="Değiştirmek istemiyorsanız boş bırakın">
+                                <small>Şifrenizi değiştirmek istemiyorsanız bu alanı boş bırakın.</small>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="kaydet-btn button-style">Kaydet</button>
+                                <button type="button" class="iptal-btn button-style">İptal</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <hr>
+
+				<section class="satin-alim-gecmisi">
+				  <h2>Satın Alım Geçmişim</h2>
+
+				  {% if purchased_items %}
+					<ul class="data-list">
+					  {% for item in purchased_items | reverse %}
+						<li>
+						  <div class="product-details">
+							<div class="product-info">
+							  <h4>{{ item.title or 'Başlıksız Ürün' }}</h4>
+							  <p>{{ item.description|truncate(120, True) or 'Açıklama yok.' }}</p>
+							</div>
+							<div class="product-actions" style="text-align: right;">
+							  <a href="{{ url_for('download_product', product_id=item.id) }}"
+								 class="button-style">
+								İndir
+							  </a>
+							</div>
+						  </div>
+						</li>
+					  {% endfor %}
+					</ul>
+				  {% else %}
+					<p>Henüz satın aldığınız bir ürün bulunmamaktadır.</p>
+				  {% endif %}
+				</section>
+
+            </main>
+        </div> 
+		
+		{% include 'partials/footer.html' %}
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const duzenleBtn      = document.querySelector('.bilgi-goster .duzenle-btn');
+        const bilgiGosterDiv  = document.querySelector('.bilgi-goster');
+        const bilgiDuzenleDiv = document.querySelector('.bilgi-duzenle');
+        const iptalBtn        = document.querySelector('.bilgi-duzenle .iptal-btn');
+        const duzenleForm     = document.getElementById('duzenleForm');
+
+        let originalValues = {};
+        if (duzenleForm) {
+            originalValues.name = duzenleForm.elements['name'] ? duzenleForm.elements['name'].value : '{{ profile.name or "" }}';
+            originalValues.phone = duzenleForm.elements['phone'] ? duzenleForm.elements['phone'].value : '{{ profile.phone or "" }}';
+        }
+
+        if (duzenleBtn && bilgiGosterDiv && bilgiDuzenleDiv && iptalBtn && duzenleForm) {
+            duzenleBtn.addEventListener('click', () => {
+                if(duzenleForm.elements['name']) duzenleForm.elements['name'].value = originalValues.name;
+                if(duzenleForm.elements['phone']) duzenleForm.elements['phone'].value = originalValues.phone;
+                if(duzenleForm.elements['password']) duzenleForm.elements['password'].value = '';
+
+                bilgiGosterDiv.style.display  = 'none';
+                bilgiDuzenleDiv.style.display = 'block';
+                if(duzenleForm.elements['name']) duzenleForm.elements['name'].focus();
+            });
+
+            iptalBtn.addEventListener('click', () => {
+                bilgiDuzenleDiv.style.display = 'none';
+                bilgiGosterDiv.style.display  = 'block';
+                
+                if(duzenleForm.elements['name']) duzenleForm.elements['name'].value = originalValues.name;
+                if(duzenleForm.elements['phone']) duzenleForm.elements['phone'].value = originalValues.phone;
+                if(duzenleForm.elements['password']) duzenleForm.elements['password'].value = '';
+            });
+        }
+      });
+    </script>
+</body>
+</html>

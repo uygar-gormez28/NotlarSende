@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>3'lü Kaydırmalı Galeri (Güncellenmiş)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #f9fafb;
+            user-select: none;          
+            font-family: 'Inter', sans-serif;
+        }
+
+        .carousel-wrapper {
+            max-width: 1200px;
+            margin: auto;
+            position: relative;
+            padding-top: 150px;
+            padding-bottom: 50px;
+        }
+
+        .carousel {
+            display: flex;
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            outline: none;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 1.5s cubic-bezier(0.77, 0, 0.175, 1);
+            will-change: transform;
+            height: 100%;
+        }
+
+        .carousel-item {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 1rem;
+            box-sizing: border-box;
+            opacity: 0.4;
+            filter: blur(5px);
+            transform: scale(0.9);
+            transition: all 1.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            max-height: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 1rem;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .carousel-item.active {
+            opacity: 1;
+            filter: blur(0);
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .carousel-item {
+                flex: 0 0 100%;
+                max-width: 100%;
+                padding: 0 0.5rem;
+            }
+            .carousel {
+                height: 350px;
+            }
+            .carousel-wrapper {
+                padding-top: 25px;
+                padding-bottom: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="carousel-wrapper">
+        <div class="carousel" id="imageCarousel" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Reklam Galerisi">
+            <div class="carousel-track" id="carouselTrack" aria-live="polite">
+                <div class="carousel-item" role="group" aria-roledescription="slide" aria-label="Slayt 1 / 7">
+                    <img src="https://www.nisantasi.edu.tr/Uploads/MAIN%20SITE/buyuk_5e6de03ff4cf85fa0d847fae4c.jpg" alt="Reklam Türleri"/>
+                </div>
+                <div class="carousel-item active" role="group" aria-roledescription="slide" aria-label="Slayt 2 / 7">
+                    <img src="https://toptalent.co/Uploads/CKImages/Ads%C4%B1z%20tasar%C4%B1m%20(9)%20(1).png" alt="Native Reklam Nedir"/>
+                </div>
+                <div class="carousel-item" role="group" aria-roledescription="slide" aria-label="Slayt 3 / 7">
+                    <img src="https://cdnuploads.aa.com.tr/uploads/Contents/2023/06/28/thumbs_b_c_2e63d716c62e09f2950dc8146bf3be04.jpg" alt="Sosyal Medya Reklam Örnekleri"/>
+                </div>
+				<div class="carousel-item" role="group" aria-roledescription="slide" aria-label="Slayt 4 / 7">
+                    <img src="https://avatars.mds.yandex.net/get-altay/2397657/2a000001719e830654ad512fbf155843842f/L_height" alt="Sosyal Medya Reklam Örnekleri"/>
+                </div>
+				<div class="carousel-item" role="group" aria-roledescription="slide" aria-label="Slayt 5 / 7">
+                    <img src="https://uludag.edu.tr/assets/images/ogrenci_dostu_universite.jpg" alt="Sosyal Medya Reklam Örnekleri"/>
+                </div>
+				<div class="carousel-item" role="group" aria-roledescription="slide" aria-label="Slayt 6 / 7">
+                    <img src="https://universiteara.com/wp-content/uploads/2024/06/ktu1_1920x960-1000x500.jpg" alt="Sosyal Medya Reklam Örnekleri"/>
+                </div>
+				<div class="carousel-item" role="group" aria-roledescription="slide" aria-label="Slayt 7 / 7">
+                    <img src="https://kbumedya.karabuk.edu.tr/uploads/a98060da-aea6-48cc-9baa-5a81a763ba69_1a1608da-d9ec-40d5-8a29-861694680a2e_2-(7).jpg" alt="Sosyal Medya Reklam Örnekleri"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const carousel = document.getElementById("imageCarousel");
+        const track = document.getElementById("carouselTrack");
+        const items = Array.from(track.children);
+        const totalItems = items.length;
+
+        const SWIPE_THRESHOLD = 50;
+        const AUTOPLAY_DURATION = 4000;
+
+        let currentIndex = 0;
+        let autoPlayInterval = null;
+        let startX = 0;
+        let isDragging = false;
+
+        function initializeCarousel() {
+            const initialActiveIndex = items.findIndex(item => item.classList.contains('active'));
+            if (initialActiveIndex !== -1) {
+                currentIndex = initialActiveIndex;
+            } else if (totalItems > 0) {
+                currentIndex = Math.floor(totalItems / 2);
+                if (totalItems === 1) currentIndex = 0;
+                if (totalItems === 2) currentIndex = 0;
+                items[currentIndex].classList.add('active');
+            }
+            updateCarousel();
+            startAutoPlay();
+            addEventListeners();
+        }
+
+        function updateCarousel(focusItem = false) {
+            const isMobile = window.innerWidth <= 768;
+            const itemWidthPercentage = isMobile ? 100 : 50;
+            let offset;
+
+            if (isMobile) {
+                offset = -(currentIndex * itemWidthPercentage);
+            } else {
+                offset = 25 - (currentIndex * itemWidthPercentage);
+            }
+            track.style.transform = `translateX(${offset}%)`;
+
+            items.forEach((item, index) => {
+                const isActive = index === currentIndex;
+                item.classList.toggle("active", isActive);
+                item.setAttribute('aria-hidden', !isActive);
+                item.setAttribute('aria-current', isActive ? 'true' : 'false');
+                item.setAttribute('aria-label', `Slayt ${index + 1} / ${totalItems}`);
+            });
+
+            if (focusItem) {
+                carousel.focus();
+            }
+        }
+
+        // Güncellenmiş: focusItem parametresi eklendi
+        function moveCarousel(direction, focusItem = false) {
+            currentIndex = (currentIndex + direction + totalItems) % totalItems;
+            updateCarousel(focusItem);
+        }
+
+        // Güncellenmiş: autoplay sırasında focusItem=false ile çağırılıyor
+        function startAutoPlay() {
+            if (autoPlayInterval) clearInterval(autoPlayInterval);
+            autoPlayInterval = setInterval(() => moveCarousel(1, false), AUTOPLAY_DURATION);
+        }
+
+        function stopAutoPlay() {
+            clearInterval(autoPlayInterval);
+        }
+
+        function handleInteractionStart(clientX) {
+            stopAutoPlay();
+            isDragging = true;
+            startX = clientX;
+            track.style.cursor = 'grabbing';
+        }
+
+        function handleInteractionMove(clientX) {
+            if (!isDragging) return;
+        }
+        
+        function handleInteractionEnd(clientX) {
+            if (!isDragging) return;
+            const diff = clientX - startX;
+            if (diff > SWIPE_THRESHOLD) {
+                moveCarousel(-1, true);
+            } else if (diff < -SWIPE_THRESHOLD) {
+                moveCarousel(1, true);
+            }
+            isDragging = false;
+            track.style.cursor = 'grab';
+            startAutoPlay();
+        }
+
+        function addEventListeners() {
+            track.addEventListener("mousedown", e => {
+                e.preventDefault();
+                handleInteractionStart(e.pageX);
+            });
+            document.addEventListener("mousemove", e => {
+                if(isDragging) handleInteractionMove(e.pageX);
+            });
+            document.addEventListener("mouseup", e => {
+                if(isDragging) handleInteractionEnd(e.pageX);
+            });
+            track.addEventListener("mouseleave", () => {
+                if (isDragging) {
+                    updateCarousel();
+                    isDragging = false;
+                    track.style.cursor = 'grab';
+                    startAutoPlay();
+                }
+            });
+
+            track.addEventListener("touchstart", e => {
+                handleInteractionStart(e.touches[0].clientX);
+            }, { passive: true });
+            track.addEventListener("touchmove", e => {
+                if(isDragging) handleInteractionMove(e.touches[0].clientX);
+            }, { passive: true });
+            track.addEventListener("touchend", e => {
+                if(isDragging) handleInteractionEnd(e.changedTouches[0].clientX);
+            });
+
+            carousel.addEventListener('mouseenter', stopAutoPlay);
+            carousel.addEventListener('mouseleave', startAutoPlay);
+            carousel.addEventListener('focusin', stopAutoPlay);
+            carousel.addEventListener('focusout', startAutoPlay);
+
+            // Klavye ile navigasyon (focusItem=true)
+            carousel.addEventListener("keydown", e => {
+                if (e.key === "ArrowLeft") {
+                    stopAutoPlay();
+                    moveCarousel(-1, true);
+                    startAutoPlay();
+                } else if (e.key === "ArrowRight") {
+                    stopAutoPlay();
+                    moveCarousel(1, true);
+                    startAutoPlay();
+                }
+            });
+
+            window.addEventListener("resize", () => {
+                updateCarousel();
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeCarousel);
+        } else {
+            initializeCarousel();
+        }
+    </script>
+</body>
+</html>

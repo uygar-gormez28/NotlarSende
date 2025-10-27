@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Örneği</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+
+    <style>
+        /* Tüm Sayfa Metinleri İçin Poppins Fontunu Uygula */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0; /* Varsayılan kenar boşluklarını kaldır */
+            padding: 0;
+            background-color: #f0f0f0; /* Arkaplan rengi eklendi */
+        }
+
+        /* CHATBOT AÇMA KAPAMA DÜĞMESİ (SAĞ ALT KÖŞEDEKİ DÜĞME) */
+        .chatbot-toggler {
+            position: fixed; /* Sayfada sabit kalır */
+            right: 40px; /* Sağdan 40 piksel boşluk */
+            bottom: 35px; /* Aşağıdan 35 piksel boşluk */
+            height: 50px; /* Yükseklik */
+            width: 50px; /* Genişlik */
+            background: #2c3e50; /* Arkaplan rengi */
+            color: white; /* İkon rengi (Sarı) */
+            border: none; /* Kenarlık yok */
+            border-radius: 50%; /* Tamamen yuvarlak */
+            display: flex; /* İçindeki ikonları ortalamak için */
+            align-items: center; /* Dikeyde ortala */
+            justify-content: center; /* Yatayda ortala */
+            cursor: pointer; /* Fare imlecini el yap */
+            transition: all 0.2s ease; /* Tüm değişimlere yumuşak geçiş */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+            z-index: 999; /* Diğer içeriklerin üstünde görünmesini sağla */
+        }
+
+        /* Açma kapama düğmesindeki "kapat" ikonunu varsayılan olarak gizle */
+        .chatbot-toggler span:last-child {
+            opacity: 0;
+        }
+
+        /* Chatbot açıkken "yorum" ikonunu gizle, "kapat" ikonunu göster */
+        .show-chatbot .chatbot-toggler span:first-child {
+            opacity: 0;
+        }
+        .show-chatbot .chatbot-toggler span:last-child {
+            opacity: 1;
+        }
+
+        /* Chatbot açıkken düğmeyi 90 derece döndür */
+        .show-chatbot .chatbot-toggler {
+            transform: rotate(90deg);
+        }
+
+        /* CHATBOT PENCERESİ */
+        .chatbot {
+            position: fixed; /* Sayfada sabit kalır */
+            right: 40px; /* Sağdan 40 piksel */
+            bottom: 100px; /* Açma düğmesinin üstünde konumlandır */
+            width: 320px; /* Genişlik */
+            background: #fff; /* Arkaplan rengi (Beyaz) */
+            border-radius: 15px; /* Köşe yuvarlaklığı */
+            box-shadow: 0 0 128px rgba(0, 0, 0, 0.1), 0 32px 64px -48px rgba(0, 0, 0, 0.5); /* Belirgin gölge */
+            /* Başlangıç Durumu: Küçük, görünmez, etkileşimsiz */
+            transform: scale(0.5); /* Boyutunu küçült */
+            opacity: 0; /* Görünmez yap */
+            pointer-events: none; /* Tıklanabilirliği kapat */
+            transform-origin: bottom right; /* Dönüşümün sağ alttan başlamasını sağla */
+            transition: all 0.2s ease; /* Yumuşak geçiş */
+            overflow: hidden; /* Boyut değişimi sırasında taşmaları gizle */
+            z-index: 999; /* Diğer içeriklerin üstünde görünmesini sağla */
+        }
+
+        /* Chatbot açıkken */
+        .show-chatbot .chatbot {
+            transform: scale(1); /* Normal boyutuna getir */
+            opacity: 1; /* Görünür yap */
+            pointer-events: auto; /* Tıklanabilir yap */
+        }
+
+        /* Chatbot Başlığı */
+        .chatbot header {
+            background: #2c3e50; /* Arkaplan rengi */
+            padding: 16px 0; /* Dikey boşluk */
+            text-align: center; /* Metni ortala */
+            position: relative; /* İçindeki kapat düğmesi için referans */
+            border-top-left-radius: 15px; /* Üst sol köşeyi yuvarla */
+            border-top-right-radius: 15px; /* Üst sağ köşeyi yuvarla */
+        }
+
+        .chatbot header h2 {
+            color: white; /* Metin rengi (Sarı) */
+            font-size: 1.4rem; /* Font boyutu */
+            margin: 0; /* Başlığın varsayılan kenar boşluğunu kaldır */
+        }
+
+        /* Başlığın İçindeki Kapat Düğmesi */
+        .chatbot header .close-btn {
+            position: absolute; /* Başlığa göre konumlandır */
+            top: 50%; /* Dikeyde ortala */
+            right: 15px; /* Sağdan 15 piksel */
+            transform: translateY(-50%); /* Dikeyde tam ortalama için */
+            color: #2c3e50; /* İkon rengi (Sarı) */
+            cursor: pointer; /* Fare imlecini el yap */
+            font-size: 1.4rem; /* İkon boyutu */
+            transition: 0.2s ease; /* Üzerine gelindiğinde yumuşak geçiş */
+        }
+         .chatbot header .close-btn:hover {
+             color: #fff; /* Üzerine gelindiğinde beyaz yap */
+         }
+
+
+        /* SOHBET ALANI (MESAJLARIN GÖSTERİLDİĞİ YER) */
+        .chatbot .chatbox {
+            height: 400px; /* Sohbet alanı için sabit yükseklik */
+            overflow-y: auto; /* Dikey kaydırmayı etkinleştir */
+            padding: 15px 20px 70px; /* İç boşluk, altta input alanı için yer bırak */
+            list-style: none; /* Varsayılan liste işaretlerini kaldır */
+            margin: 0; /* Varsayılan kenar boşluklarını kaldır */
+        }
+
+        /* Her bir sohbet mesajı için stil */
+        .chatbox .chat {
+            display: flex; /* İkon ve metni yan yana dizmek için */
+            margin-bottom: 15px; /* Mesajlar arasına boşluk */
+            align-items: flex-start; /* Öğeleri yukarıya hizala */
+        }
+
+        /* Gelen Mesajlardaki (AI Cevabı) İkon */
+        .chatbox .incoming span {
+            height: 32px;
+            width: 32px;
+            color: #fff; /* İkon rengi (Beyaz) */
+            background: #2c3e50; /* İkon arkaplanı */
+            text-align: center; /* İkonu ortala */
+            line-height: 32px; /* İkonu dikeyde ortala */
+            border-radius: 4px; /* Köşeleri hafif yuvarla */
+            margin-right: 8px; /* İkon ile metin arasına boşluk */
+            flex-shrink: 0; /* Küçük ekranlarda sıkışmasını engelle */
+        }
+
+        /* Sohbet Mesajlarının Metin Paragrafı */
+        .chatbox .chat p {
+            max-width: 70%; /* Mesaj genişliğini sınırla */
+            padding: 10px 15px; /* İç boşluk */
+            border-radius: 10px; /* Köşeleri yuvarla */
+            font-size: 0.95rem; /* Font boyutu */
+            line-height: 1.4; /* Satır yüksekliği */
+            white-space: pre-wrap; /* Boşlukları koru ve satırları kır */
+            margin: 0; /* Varsayılan kenar boşluğunu kaldır */
+        }
+
+        /* Gelen Mesajlar (AI Cevabı) İçin Stil */
+        .chatbox .incoming p {
+            background: #f2f2f2; /* Açık gri arkaplan */
+            color: #000; /* Metin rengi (Siyah) */
+            border-top-left-radius: 0; /* İkonun yanındaki köşeyi sivri yap */
+        }
+
+        /* Giden Mesajlar (Kullanıcı Girişi) İçin Stil */
+        .chatbox .outgoing {
+            justify-content: flex-end; /* Sağ tarafa hizala */
+            align-items: flex-start; /* Öğeleri yukarıya hizala */
+        }
+
+        .chatbox .outgoing p {
+            background: #2c3e50; /* Renk arkaplan */
+            color: white; /* Beyaz metin */
+            border-bottom-right-radius: 0; /* Sağ alttaki köşeyi sivri yap */
+        }
+
+        /* Yazıyor... Animasyonu İçin Stil */
+        .chatbox .incoming p.typing-animation {
+            display: inline-block; /* Satır içi blok eleman yap */
+            width: 35px; /* Noktalar için sabit genişlik */
+            height: 10px; /* Sabit yükseklik */
+            background: #ccc; /* Gri placeholder */
+            border-radius: 5px; /* Yuvarlak köşeler */
+            animation: typing 1s infinite ease-in-out; /* Yazıyor animasyonu */
+        }
+
+        /* Yazıyor... Animasyonu Anahtar Kareleri */
+        @keyframes typing {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.5; }
+        }
+
+        /* Hata Mesajı Stili */
+        .chatbox .chat p.error {
+            color: #dc3545; /* Kırmızı renk */
+        }
+
+        /* SOHBET GİRİŞ ALANI */
+        .chatbot .chat-input {
+            position: absolute; /* Chatbot penceresine göre konumlandır */
+            bottom: 0; /* Alt kenara yapıştır */
+            left: 0; /* Sol kenara yapıştır */
+            width: 100%; /* Tam genişlik */
+            display: flex; /* İçindeki elemanları yan yana diz */
+            align-items: center; /* Dikeyde ortala */
+            padding: 15px 20px; /* İç boşluk */
+            border-top: 1px solid #ccc; /* Üst kenarlık (ayıraç) */
+            background: #fff; /* Beyaz arkaplan */
+            box-sizing: border-box; /* Padding ve border'ı genişliğe dahil et */
+        }
+
+        .chat-input textarea {
+            flex-grow: 1; /* Mevcut alanı kaplamasını sağla */
+            height: 55px; /* Başlangıç yüksekliği */
+            max-height: 150px; /* Çok satırlı giriş için maksimum yükseklik */
+            width: 100%; /* flex-grow ile birlikte doğru çalışması için */
+            border: none; /* Kenarlık yok */
+            outline: none; /* Tıklandığında çıkan çerçeveyi kaldır */
+            font-size: 0.95rem; /* Font boyutu */
+            padding: 10px 15px; /* İç boşluk */
+            margin-right: 10px; /* Gönder düğmesi ile arasına boşluk */
+            resize: none; /* Kullanıcının boyutunu değiştirmesini engelle */
+            border-radius: 5px; /* Köşeleri yuvarla */
+            background: #f8f8f8; /* Hafif farklı arkaplan */
+            font-family: 'Poppins', sans-serif; /* Fontu uygula */
+        }
+
+        .chat-input span {
+            color: #2c3e50; /* İkon rengi */
+            font-size: 1.7rem; /* İkon boyutu */
+            cursor: pointer; /* Fare imlecini el yap */
+            user-select: none; /* Metin seçilmesini engelle */
+            transition: 0.2s ease; /* Yumuşak geçiş */
+        }
+
+        .chat-input span:hover {
+             color: #2c3e50; /* Üzerine gelindiğinde Sarı yap */
+        }
+
+        /* Textarea boş değilken gönder düğmesini aktif/renkli yap */
+        .chat-input textarea:valid ~ span {
+            color: #2c3e50; /* Sarı */
+        }
+
+        /* TEMEL MOBİL UYUMLULUK (RESPONSIVE) */
+        @media (max-width: 800px) {
+            .chatbot-toggler {
+                right: 20px; /* Küçük ekranlarda kenara daha yakın */
+                bottom: 20px;
+            }
+            .chatbot {
+                right: 0; /* Sağ kenara yapıştır */
+                bottom: 0; /* Alt kenara yapıştır */
+                width: 100%; /* Tam ekran genişliği */
+                height: 100%; /* Tam ekran yüksekliği */
+                border-radius: 0; /* Köşe yuvarlaklığını kaldır */
+                box-shadow: none; /* Gölgeyi kaldır (tam ekranda gereksiz) */
+            }
+            .chatbot .chatbox {
+                height: calc(100% - 120px); /* Başlık ve input alanının yüksekliğini düş */
+                padding-bottom: 90px; /* Alt kısımda input alanı için yeterli boşluk bırak */
+            }
+            .chatbot header {
+                 border-radius: 0; /* Başlık köşe yuvarlaklığını kaldır */
+            }
+             /* Chatbot tam ekran açıkken açma/kapama düğmesini gizle */
+            .show-chatbot .chatbot-toggler {
+                 display: none;
+            }
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <button class="chatbot-toggler">
+        <span class="material-symbols-outlined">mode_comment</span> <span class="material-symbols-outlined">close</span>      </button>
+
+    <section class="chatbot">
+        <header>
+            <h2>Zafer Chatbot</h2> <span class="close-btn material-symbols-outlined">close</span> </header>
+
+        <ul class="chatbox">
+            <li class="chat incoming">
+                <span class="material-symbols-outlined">smart_toy</span>
+                <p>Merhaba ben yapay zeka asistanınız Zafer, nasıl yardımcı olabilirim?</p>
+            </li>
+        </ul>
+
+        <div class="chat-input">
+            <textarea placeholder="Mesajınızı buraya yazın..." required></textarea> <span id="send-btn" class="material-symbols-outlined">send</span> </div>
+    </section>
+
+    <script>
+        // --- Chatbot Kurulumu ve Mantığı ---
+        const chatInput = document.querySelector(".chat-input textarea"); // Textarea elementini seç
+        // Gönder düğmesi ikonunu seç (ID'sini send-btn olarak değiştirdik)
+        const sendChatBtn = document.querySelector("#send-btn");
+        const chatbox = document.querySelector(".chatbox"); // Mesaj alanını seç
+        const chatbotToggler = document.querySelector(".chatbot-toggler"); // Açma/kapama düğmesini seç
+        const chatbotCloseBtn = document.querySelector(".close-btn"); // Pencere kapatma düğmesini seç
+
+        let userMessage = null; // Kullanıcının mesajını tutacak değişken
+
+        // !! GÜVENLİK UYARISI !!
+        // API anahtarınızı direkt ön yüz (front-end) kodunda saklamak ÇOK GÜVENSİZDİR.
+        // Herkes bu kodu görüntüleyip anahtarınızı çalabilir ve hesabınız üzerinden API kullanabilir.
+        // Gerçek uygulamalar için API çağrılarını GÜVENLİ bir arka uç (backend) sunucusundan yapmalısınız.
+        // Aşağıdaki anahtar muhtemelen zaten süresi dolmuş veya geçersizdir.
+        const API_KEY = "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"; // Gerçek API anahtarınızla burayı değiştirin (ve bir backend kullanın!)
+
+        const inputInitHeight = chatInput.scrollHeight; // Textarea'nın başlangıç yüksekliği (padding dahil)
+
+        // Sohbet mesajı elementi (<li>) oluşturan fonksiyon
+        function createChatLi(message, className) {
+            // Yeni bir liste öğesi (li) oluştur
+            const li = document.createElement("li");
+            // 'chat' ve belirtilen sınıfı (örneğin 'incoming', 'outgoing') ekle
+            li.className = `chat ${className}`;
+            // Mesaj türüne göre HTML içeriğini ayarla
+            li.innerHTML = className === "outgoing"
+                ? `<p>${message}</p>` // Giden mesaj için sadece metin
+                : `<span class="material-symbols-outlined">smart_toy</span><p>${message}</p>`; // Gelen mesaj için ikon + metin
+            return li; // Oluşturulan li elementini döndür
+        }
+
+        // API'den AI cevabını getiren fonksiyon
+        function generateResponse(incomingChatLi) {
+            const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+            // Gelen mesaj li elementi içindeki <p> elementini seç (buraya cevap yazılacak)
+            const msgEl = incomingChatLi.querySelector("p");
+
+            // Configuration for the API request
+            const requestOptions = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // !! GÜVENLİK UYARISI: Bu başlık API anahtarınızı tarayıcıda ifşa eder!
+                    // Bu API çağrısını güvenli bir arka uç sunucusundan yapın.
+                    "Authorization": `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    // Kullanmak istediğiniz AI modelini seçin
+                    // OpenRouter'da kullanılabilir modellere bakabilirsiniz.
+                    model: "deepseek/deepseek-chat", // Örnek bir model adı
+                    messages: [{ role: "user", content: userMessage }] // Kullanıcının mesajını gönder
+                })
+            };
+
+            // Send the API request
+            fetch(API_URL, requestOptions)
+                .then(res => {
+                     if (!res.ok) {
+                        throw new Error(`API Hatası: ${res.status} ${res.statusText}`);
+                     }
+                     return res.json(); // Yanıtı JSON olarak parse et
+                 })
+                .then(data => {
+                    // Set the AI's response text
+                    // Check if data structure is as expected
+                    if (data && data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content !== undefined) {
+                        msgEl.textContent = data.choices[0].message.content.trim(); // Cevabı yaz, başındaki/sonundaki boşlukları temizle
+                         // *** YENİ EKLENEN KOD: Animasyon sınıfını kaldır ***
+                        msgEl.classList.remove('typing-animation');
+                    } else {
+                         throw new Error("Geçersiz API yanıt formatı"); // Beklenmeyen yanıt formatı hatası
+                    }
+                })
+                .catch((error) => {
+                    // Handle errors during the fetch or processing
+                    console.error("AI cevabı alınırken hata oluştu:", error);
+                    msgEl.classList.add("error"); // Hata stili için sınıf ekle
+                    // Kullanıcıya gösterilecek hata mesajı
+                    msgEl.textContent = "Oops! Bir hata oluştu. Lütfen tekrar deneyin.";
+                    if (error.message.includes("401")) {
+                        msgEl.textContent = "API hatası: Geçersiz anahtar veya kimlik doğrulama sorunu.";
+                    } else if (error.message.includes("429")) {
+                        msgEl.textContent = "API hatası: Çok fazla istek gönderildi (Rate Limit).";
+                    }
+                     // *** YENİ EKLENEN KOD: Hata durumunda da animasyon sınıfını kaldır ***
+                    msgEl.classList.remove('typing-animation');
+                })
+                .finally(() => {
+                    // İşlem bittikten sonra her zaman en son mesaja kaydır
+                    chatbox.scrollTo(0, chatbox.scrollHeight);
+                });
+        }
+
+        // Kullanıcı mesajını gönderme işlemini yöneten fonksiyon
+        function handleChat() {
+            // Textarea'dan kullanıcı mesajını al, başındaki/sonundaki boşlukları sil
+            userMessage = chatInput.value.trim();
+            // Eğer mesaj boşsa, hiçbir şey yapma
+            if (!userMessage) return;
+
+            // Input alanını temizle
+            chatInput.value = "";
+            // Textarea'nın yüksekliğini başlangıç durumuna getir
+            chatInput.style.height = `${inputInitHeight}px`;
+
+            // Kullanıcının mesajını sohbet kutusuna ekle (outgoing olarak)
+            chatbox.appendChild(createChatLi(userMessage, "outgoing"));
+            // Sohbet kutusunu en alta kaydır
+            chatbox.scrollTo(0, chatbox.scrollHeight);
+
+            // AI'ın cevap vermesini beklerken "Yazıyor..." göstergesini göster
+            setTimeout(() => {
+                const incomingChatLi = createChatLi("Yazıyor...", "incoming"); // "Yazıyor..." mesajı oluştur
+                 // Yazıyor animasyonu için sınıf ekle
+                incomingChatLi.querySelector('p').classList.add('typing-animation');
+                chatbox.appendChild(incomingChatLi); // Sohbet kutusuna ekle
+                chatbox.scrollTo(0, chatbox.scrollHeight); // En alta kaydır
+                // AI cevabını almak için fonksiyonu çağır
+                generateResponse(incomingChatLi);
+            }, 600); // "Yazıyor..." göstergesini göstermeden önce 600ms bekle
+        }
+
+        // Textarea'ya yazı yazıldığında yüksekliğini otomatik ayarlama eventi
+        chatInput.addEventListener("input", () => {
+            // Yüksekliği sıfırla, sonra içeriğe göre ayarla
+            chatInput.style.height = `${inputInitHeight}px`; // Önce başlangıç yüksekliğine getir
+            chatInput.style.height = `${chatInput.scrollHeight}px`; // Sonra içeriğin sığdığı yüksekliğe ayarla
+        });
+
+        // Textarea'da tuşa basıldığında (keydown) eventi
+        chatInput.addEventListener("keydown", e => {
+            // Eğer Enter tuşuna basıldıysa (Shift olmadan) ve ekran genişliği 800px'ten fazlaysa
+            if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
+                e.preventDefault(); // Varsayılan Enter (yeni satır) işlemini engelle
+                handleChat(); // Mesaj gönderme fonksiyonunu çağır
+            }
+            // Not: Küçük ekranlarda Enter tuşu yeni satır eklemeye devam eder
+        });
+
+        // Gönder düğmesine tıklandığında eventi
+        sendChatBtn.addEventListener("click", handleChat);
+
+        // Chatbot açma/kapama düğmesine tıklandığında eventi
+        chatbotToggler.addEventListener("click", () => {
+            // Body elementine 'show-chatbot' sınıfını ekleyip kaldırır.
+            // CSS bu sınıfa göre chatbot'u gösterir/gizler/şekillendirir.
+            document.body.classList.toggle("show-chatbot");
+        });
+
+        // Chatbot başlığındaki kapat düğmesine tıklandığında eventi
+        chatbotCloseBtn.addEventListener("click", () => {
+            // Body elementinden 'show-chatbot' sınıfını kaldırır (chatbot'u gizler)
+            document.body.classList.remove("show-chatbot");
+        });
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!-- publish_modal.html -->
+<div id="pm-modal-root" class="pm-modal-root">
+  <div class="pm-modal-backdrop" onclick="closePmModal()"></div>
+  <div class="pm-modal-container">
+    <span class="pm-modal-close-btn" onclick="closePmModal()">&times;</span>
+    <h2>Yayın Bilgileri</h2>
+    <form id="pm-publish-form" method="post" action="{{ url_for('publish_product') }}" enctype="multipart/form-data">
+      <input type="hidden" name="filename" id="pm-input-filename">
+      <input type="text" name="title" placeholder="Ders Adı" required><br>
+      <input type="text" name="university" placeholder="Üniversite" required><br>
+      <input type="text" name="faculty" placeholder="Bölüm" required><br>
+      <textarea name="description" placeholder="Açıklama" required></textarea><br>
+      <input type="text" name="price" placeholder="Fiyat (örnek: 50 TL)" required><br>
+      
+      <div class="pm-file-upload-area">
+        <label for="pm-file-input-trigger" class="pm-file-upload-button">
+          🖼️ Fotoğraf Seç (En fazla 5 adet)
+        </label>
+        <input type="file" name="images" id="pm-file-input-trigger" class="pm-file-input-hidden" accept="image/png, image/jpeg, image/gif" multiple>
+        
+        <div id="pm-image-previews" class="pm-image-previews-container">
+          <p class="pm-no-preview-text">Henüz fotoğraf seçilmedi.</p>
+        </div>
+        <small>Desteklenen formatlar: JPG, PNG, GIF, JPEG.</small>
+      </div>
+      <button type="submit" class="pm-btn-publish">Yayınla</button>
+    </form>
+    <form id="pm-delete-form" method="post" action="{{ url_for('delete_product') }}">
+      <input type="hidden" name="filename" id="pm-input-delete-filename">
+      <button type="submit" class="pm-btn-delete"
+              onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+        🗑️ Ürünü Sil
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+  /* Container */
+  .pm-modal-root {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 2000;
+  }
+  .pm-modal-backdrop {
+    position: absolute;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+  }
+  .pm-modal-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 32px;
+    width: 420px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 2001;
+    text-align: center;
+  }
+  .pm-modal-close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 26px;
+    color: #888;
+    cursor: pointer;
+  }
+  .pm-modal-close-btn:hover {
+    color: #333;
+  }
+
+  /* Inputs & textarea */
+  #pm-input-filename,
+  #pm-input-delete-filename,
+  .pm-modal-container input[type="text"],
+  .pm-modal-container textarea {
+    width: 88%;
+    margin: 8px 0;
+    padding: 8px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+  }
+
+  /* Buttons */
+  .pm-btn-publish {
+    margin-top: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .pm-btn-publish:hover {
+    background-color: #218838;
+  }
+  .pm-btn-delete {
+    margin-top: 16px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .pm-btn-delete:hover {
+    background-color: #c82333;
+  }
+  
+  /* === YENİ FOTOĞRAF YÜKLEME ALANI STİLLERİ BAŞLANGICI === */
+  .pm-file-upload-area {
+    margin: 15px 0;
+    padding: 10px;
+    border: 2px dashed #007bff; /* Dikkat çekici bir çerçeve */
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    text-align: center;
+  }
+
+  .pm-file-upload-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+
+  .pm-file-upload-button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Gerçek dosya input'unu gizle */
+  .pm-file-input-hidden {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+  }
+
+  .pm-image-previews-container {
+    margin-top: 15px;
+    display: flex; /* Resimleri yan yana sırala */
+    flex-wrap: wrap; /* Taşan resimleri alt satıra al */
+    gap: 10px; /* Resimler arası boşluk */
+    justify-content: center; /* Resimleri ortala */
+  }
+
+  .pm-preview-image-container { /* Her bir resim ve sil butonu için sarmalayıcı (ileride sil butonu eklenirse diye) */
+    position: relative;
+  }
+  
+  .pm-preview-image {
+    width: 80px;  /* Önizleme resim boyutu */
+    height: 80px;
+    object-fit: cover; /* Resmin orantısını koruyarak alanı kapla */
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+
+  .pm-no-preview-text {
+    font-size: 0.9em;
+    color: #6c757d;
+    width: 100%; /* Konteynerin tamamını kaplasın */
+  }
+  /* === YENİ FOTOĞRAF YÜKLEME ALANI STİLLERİ SONU === */
+
+</style>
+
+  <script>
+    // --- Global fonksiyonlar (buton onclick ile erişilecek) ---
+    function openModal() {
+      document.getElementById("uploadModal").style.display = "block";
+    }
+    function closeModal() {
+      document.getElementById("uploadModal").style.display = "none";
+    }
+    function openPmModal(filename) {
+      document.getElementById("pm-input-filename").value = filename;
+      document.getElementById("pm-input-delete-filename").value = filename;
+      document.getElementById("pm-modal-root").style.display = "block";
+    }
+    function closePmModal() {
+      document.getElementById("pm-modal-root").style.display = "none";
+    }
+    window.addEventListener("click", function(e) {
+      if (e.target.classList.contains("pm-modal-backdrop")) {
+        closePmModal();
+      }
+    });
+
+    // --- Geri kalan tüm event listener’lar burada ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // **Upload modal drag&drop**
+      let uploadSubmitted = false;
+      const dropZoneUpload  = document.getElementById('dropZone');
+      const fileInputUpload = document.getElementById('fileInput');
+      const uploadForm      = document.getElementById('uploadForm');
+
+      dropZoneUpload.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropZoneUpload.classList.add('hover');
+      });
+      dropZoneUpload.addEventListener('dragleave', () => {
+        dropZoneUpload.classList.remove('hover');
+      });
+      dropZoneUpload.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZoneUpload.classList.remove('hover');
+        if (uploadSubmitted) return;
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          uploadSubmitted = true;
+          const dt = new DataTransfer();
+          dt.items.add(files[0]);
+          fileInputUpload.files = dt.files;
+          uploadForm.submit();
+        }
+      });
+      fileInputUpload.addEventListener('change', () => {
+        if (uploadSubmitted || fileInputUpload.files.length === 0) return;
+        uploadSubmitted = true;
+        uploadForm.submit();
+      });
+
+      // **Publish modal image preview**
+      const fileInputPublish   = document.getElementById('pm-file-input-trigger');
+      const previewContainer   = document.getElementById('pm-image-previews');
+      const maxFiles           = 5;
+
+      if (fileInputPublish && previewContainer) {
+        fileInputPublish.addEventListener('change', event => {
+          previewContainer.innerHTML = '';
+          const files = Array.from(event.target.files).slice(0, maxFiles);
+          if (!files.length) {
+            const p = document.createElement('p');
+            p.classList.add('pm-no-preview-text');
+            p.textContent = 'Henüz fotoğraf seçilmedi.';
+            previewContainer.appendChild(p);
+            return;
+          }
+          if (event.target.files.length > maxFiles) {
+            alert(`En fazla ${maxFiles} fotoğraf seçebilirsiniz.`);
+          }
+          files.forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+              const c = document.createElement('div');
+              c.classList.add('pm-preview-image-container');
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              img.alt = file.name;
+              img.classList.add('pm-preview-image');
+              c.appendChild(img);
+              previewContainer.appendChild(c);
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
+

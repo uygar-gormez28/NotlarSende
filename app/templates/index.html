@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NotlarSende.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+	{% include 'partials/preloader.html' %}
+
+	{% include 'partials/header.html' %}
+
+	{% include 'partials/marquee.html' %}
+
+	{% include 'partials/banner.html' %}
+
+	{% include 'partials/hamburgermenu.html' %}
+
+	<main class="notlar-container">
+	{% include 'partials/product_list.html' %}
+	</main>
+
+	{% include 'partials/publish_modal.html' %}
+
+	{% include 'partials/chatbot.html' %}
+
+	{% include 'partials/footer.html' %}
+  
+</body>
+
+</html>

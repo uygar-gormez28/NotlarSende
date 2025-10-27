@@ -1,0 +1,34 @@
+
+-----------KURULUM----------------------
+start.bat açılmıyorsa yapman gerekenler
+
+**Buradaki Kurulum.bat dosyasını başlatıp ve gerekli adımları takip ederek işlemi daha hızlı
+yapabilirsiniz.** daha sonra tarayıcıda 127.0.0.1:5000 url adresine girilmelidir. böylece index.html başlar.
+
+---------MANUEL KURULUM AŞAMALARI-----------------
+
+1-dosyanın masaüstünde olduğuna emin ol
+
+2-cmd aç // cd desktop/NotlarSende // yaz dosya yolu farklı olabilir 
+	bunu dosya üzerinden görebilirsin
+	
+3-C:\Users\Safak\Desktop\NotlarSende> yol bu şekilde olmalı örnek olarak şuan yada onedrive aktifse
+	ve türkçe windows ise C:\Users\Safak\onedrive\masaüstü\NotlarSende>
+	
+4-venv\Scripts\activate bunu yazdıkdan sonra cmd 'de venv ibaresi görünmeli
+	
+5-şimdi pip "list yaz" ve biraz bekle daha sonra "pip install flask" yaz.
+
+6-artık start.bat başlamalı
+
+7-daha sonra google chrome yada herhangi bir tarayıcıda url kısmına 127.0.0.1:5000 yazmalısın.
+  artık siteyi aktif olarak görebilirsiniz.
+--------------------------------------------------
+
+
+------------BAZI DOSYALARI AÇAMAMA SORUNU-----------
+html dosyalarına tıklayıp açılmıyor çünkü çoğu şey sunucu tarafından localhost'den çekiliyor bu yüzden
+venv kurup başlatılmalı.
+
+
+const API_KEY = "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";

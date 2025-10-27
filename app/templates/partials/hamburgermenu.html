@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fakülte Menüsü</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .main-menu-wrapper aside ul li {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-menu-wrapper aside ul li a {
+            display: block;
+            padding: 0.5rem;
+            color: white;
+            transition: transform 0.3s ease-out, color 0.3s ease-out, box-shadow 0.3s ease-out;
+            transform-origin: left center;
+            box-shadow: none;
+        }
+
+        .main-menu-wrapper aside ul li a:hover {
+            transform: scale(1.2) translateX(20px);
+            color: yellow;
+            z-index: 10;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8);
+        }
+
+        .bg-panel-opacity {
+            background-color: rgba(44, 62, 80, 0.85);
+            backdrop-filter: blur(6px);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+
+    <div class="main-menu-wrapper">
+        <div
+            id="faculty-toggle-button"
+            class="fixed left-0 top-[25vh] rounded-tr-2xl rounded-br-2xl text-center p-3 w-40 cursor-pointer bg-[#2c3e50] z-20"
+        >
+            <span class="text-white text-lg font-semibold">☰ Fakülteler</span>
+        </div>
+
+        <div id="navigation-panel-container" class="hidden">
+            <aside class="fixed left-0 top-[25vh] w-64 rounded-tr-xl rounded-br-xl bg-panel-opacity shadow-xl pb-4 z-10">
+                <div class="panel-header-title font-bold text-white italic text-center p-3">
+                    <h2>☰ Fakülteler</h2>
+                </div>
+                <ul class="text-white">
+                    <li class="cursor-pointer"><a href="#">Mühendislik-Mimarlık Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Tıp Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Ziraat Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Fen Edebiyat Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Sağlık Bilimleri Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Diş Hekimliği Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Güzel Sanatlar Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">İletişim Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Hukuk Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Eczacılık Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Spor Bilimleri Fakültesi</a></li>
+                    <li class="cursor-pointer"><a href="#">Mimarlık Fakültesi</a></li>
+                </ul>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        const facultyToggleButton = document.getElementById("faculty-toggle-button");
+        const navigationPanelContainer = document.getElementById("navigation-panel-container");
+        const navigationAside = navigationPanelContainer.querySelector("aside");
+
+        facultyToggleButton.addEventListener("click", () => {
+            navigationPanelContainer.classList.remove("hidden");
+            facultyToggleButton.classList.add("hidden");
+        });
+
+        navigationAside.addEventListener("click", () => {
+            if (!navigationPanelContainer.classList.contains("hidden")) {
+                navigationPanelContainer.classList.add("hidden");
+                facultyToggleButton.classList.remove("hidden");
+            }
+        });
+    </script>
+</body>
+</html>

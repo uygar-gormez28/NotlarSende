@@ -1,0 +1,264 @@
+{# app/templates/partials/product_card.html #}
+<div class="product-card">
+  <div class="file-icon">
+    {% if product.images and product.images|length > 0 %}
+      <div class="image-carousel"
+           data-images='[
+             {% for img in product.images %}
+               "{{ url_for("uploaded_file", filepath=img) }}"{{ "," if not loop.last }}
+             {% endfor %}
+           ]'>
+        {# İlk resmi gösteriyoruz #}
+        <img src="{{ url_for('uploaded_file', filepath=product.images[0]) }}"
+             alt="Ürün Görseli"
+             class="carousel-img">
+        <button type="button" class="carousel-btn prev-btn" aria-label="Önceki">&lsaquo;</button>
+        <button type="button" class="carousel-btn next-btn" aria-label="Sonraki">&rsaquo;</button>
+      </div>
+    {% else %}
+      {# Tek resim veya varsayılan resim için carousel yapısı olmadan direkt img,
+         ama yine de aynı görünüm için bir sarmalayıcı gerekebilir.
+         Şimdilik basit tutalım, gerekirse bu kısım da .image-carousel içine alınabilir.
+      #}
+      <div class="image-carousel static-image"> {# Carousel olmasa da hover efekti için benzer yapı #}
+        <img src="{{ url_for('static', filename='img/defaultpp.jpeg') }}"
+             alt="Varsayılan Görsel"
+             class="carousel-img no-carousel">
+      </div>
+    {% endif %}
+  </div>
+  <div class="file-name">{{ product.filename }}</div>
+  <div class="product-title">{{ product.title or "Ders Adı Yok" }}</div>
+  <div class="product-meta">
+    <span>{{ product.university or "Üniversite Yok" }}</span> –
+    <span>{{ product.faculty or "Bölüm Yok" }}</span>
+  </div>
+  <div class="product-desc">{{ product.description or "Açıklama yok." }}</div>
+  <div class="product-price">{{ product.price or "Ücretsiz" }} ₺</div>
+
+  <div class="publish-info">
+    {% if product.published %}
+      <span class="badge published">✅ Yayında</span>
+    {% else %}
+      <span class="badge not-published">⏳ Yayınlanmadı</span>
+    {% endif %}
+    <div class="date">Yükleme: {{ product.date or "?" }}</div>
+  </div>
+
+  {% if current_user and current_user.email == product.uploader %}
+    <button class="publish-btn" onclick="openPmModal('{{ product.filename }}')">Düzenle</button>
+  {% else %}
+    <button
+      class="buy-btn add-to-cart-btn"
+      data-product-id="{{ product.id }}"
+      data-filename="{{ product.filename }}">
+      Sepete Ekle
+    </button>
+  {% endif %}
+</div>
+
+<style>
+  /* GENEL KART STİLLERİ */
+  .product-card {
+    display: inline-flex;  /* inline-flex ile yatay düzen */
+    flex-direction: column;
+	vertical-align: top;
+    width: 230px;
+    padding: 16px;
+    margin: 12px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative; /* .image-carousel'ın absolute pozisyonlanması için */
+    overflow: visible; /* Büyüyen .image-carousel'ın dışarı taşabilmesi için (veya :hover'da overflow:visible) */
+  }
+
+  .product-card:hover {
+    /* transform: translateY(-5px); */ /* Bu efekti kaldırabiliriz çünkü resim büyüyecek */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Gölgeyi biraz daha belirgin yapalım */
+    z-index: 10; /* Hover olan kartın diğerlerinin üzerine çıkması için */
+  }
+
+  .file-icon {
+    /* Bu sarmalayıcı artık .image-carousel'ın yüksekliğini belirleyecek ana etken olmayabilir */
+    /* height: 100px; /* Sabit yükseklik, .image-carousel'ın büyümesi için alan tanır */
+    /* margin-bottom: 10px; */
+    position: relative; /* İçindeki carousel'in doğru çalışması için */
+    display: flex; /* İçeriği ortalamak için */
+    justify-content: center; /* Carousel'i ortalamak için */
+    align-items: center;
+    min-height: 100px; /* Kartın küçülmemesi için başlangıç yüksekliği */
+    margin-bottom: 10px;
+  }
+
+  .file-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    word-break: break-word;
+  }
+
+  .product-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 4px 0 8px 0;
+    color: #222;
+    min-height: 2.4em;
+    line-height: 1.2em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-meta { font-size: 12px; color: #555; margin-bottom: 6px; }
+  .product-desc { font-size: 13px; color: #666; margin-bottom: 10px; min-height: 40px; line-height: 1.3em; overflow: hidden; text-overflow: ellipsis; }
+  .product-price { font-size: 15px; font-weight: bold; color: #4CAF50; margin-bottom: 12px; }
+  .publish-info { margin-bottom: 12px; }
+  .badge { display: inline-block; padding: 5px 10px; font-size: 11px; font-weight: 500; border-radius: 15px; margin-bottom: 6px; }
+  .published { background-color: #e6ffed; color: #00875a; }
+  .not-published { background-color: #fff8e1; color: #ffab00; }
+  .date { font-size: 11px; color: #777; }
+
+  .publish-btn, .buy-btn {
+    border: none; color: white; padding: 10px 16px; border-radius: 8px;
+    cursor: pointer; font-size: 14px; font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: 100%; margin-top: auto;
+  }
+  .publish-btn:hover, .buy-btn:hover { transform: scale(1.03); }
+  .publish-btn:active, .buy-btn:active { transform: scale(0.98); }
+  .publish-btn { background-color: #007BFF; }
+  .publish-btn:hover { background-color: #0056b3; }
+  .buy-btn { background-color: #28a745; }
+  .buy-btn:hover { background-color: #218838; }
+
+  /* CAROUSEL STİLLERİ */
+  .image-carousel {
+    position: relative; /* Başlangıçta relative, hover'da absolute olacak */
+    width: 100px;
+    height: 100px;
+    /* margin: 0 auto 12px; */ /* .file-icon ortalayacak */
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Yumuşak geçiş */
+    background-color: #f0f0f0; /* Resim yüklenene kadar veya boşsa */
+    z-index: 1; /* Başlangıç z-index'i */
+  }
+
+  .image-carousel.static-image .carousel-img {
+    cursor: default; /* Statik resimde zoom imleci olmasın */
+  }
+
+  .product-card:hover .image-carousel {
+    position: absolute;
+    width: calc(100% - 10px); /* Kartın padding'lerini hesaba katarak biraz içerde */
+    height: 180px; /* Büyümüş yükseklik, isteğe bağlı */
+    top: 5px;  /* Kartın üstünden boşluk */
+    left: 5px; /* Kartın solundan boşluk */
+    z-index: 20; /* Diğer kart elemanlarının üzerine çıkar */
+    border-radius: 6px; /* Büyüdüğünde de köşeler yuvarlak */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    background-color: #fff; /* Arkaplanı örtsün */
+  }
+
+  .carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    border: none;
+    width: 28px; /* Butonlar biraz daha belirgin olabilir */
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    opacity: 0; /* Başlangıçta tamamen gizli */
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    z-index: 5; /* Resmin üzerinde olması için */
+  }
+
+  /* Kart üzerine gelindiğinde ve carousel büyüdüğünde butonlar görünür olsun */
+  .product-card:hover .image-carousel .carousel-btn {
+    opacity: 1;
+  }
+  /* Sadece carousel'in üzerine gelindiğinde de butonlar görünebilir (opsiyonel) */
+  /* .image-carousel:hover .carousel-btn {
+      opacity: 1;
+  } */
+
+  .carousel-btn:hover {
+    background: rgba(0,0,0,0.6);
+  }
+
+  .prev-btn { left: 8px; } /* Büyümüş halde pozisyon */
+  .next-btn { right: 8px; } /* Büyümüş halde pozisyon */
+
+  .image-carousel.static-image .carousel-btn {
+      display: none; /* Statik resimlerde buton olmasın */
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // --- Carousel Script'i (Değişiklik yok, olduğu gibi kalabilir) ---
+  document.querySelectorAll('.image-carousel:not(.static-image)').forEach(function(carousel) {
+    const data = carousel.getAttribute('data-images');
+    if (!data) return;
+
+    let imgs;
+    try {
+      imgs = JSON.parse(data);
+    } catch (e) {
+      console.error("Failed to parse images data:", e, data);
+      return;
+    }
+
+    if (!imgs || imgs.length === 0) return;
+
+    let currentIndex = 0;
+    const imgElement = carousel.querySelector('.carousel-img');
+    const prevButton = carousel.querySelector('.prev-btn');
+    const nextButton = carousel.querySelector('.next-btn');
+
+    function updateImage() {
+      if (imgElement) {
+        imgElement.src = imgs[currentIndex];
+      }
+    }
+
+    if (prevButton) {
+      prevButton.addEventListener('click', function(event) {
+        event.stopPropagation(); // Kartın diğer tıklama olaylarını tetiklemesin
+        currentIndex = (currentIndex - 1 + imgs.length) % imgs.length;
+        updateImage();
+      });
+    }
+
+    if (nextButton) {
+      nextButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        currentIndex = (currentIndex + 1) % imgs.length;
+        updateImage();
+      });
+    }
+    // İlk resim zaten HTML'de src ile ayarlı olduğu için updateImage() çağrısına gerek yok.
+  });
+
+  // Tam ekran modal veya diğer karmaşık JS büyütme scriptleri buraya GEREKMİYOR.
+  // Büyütme tamamen CSS :hover ile yönetiliyor.
+});
+</script>
